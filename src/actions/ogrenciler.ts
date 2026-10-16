@@ -68,6 +68,8 @@ export async function ogrenciGuncelle(
     .update(kolonlaraCevir(sonuc.data))
     .eq("id", ogrenciId)
     .eq("hoca_id", kullanici.id)
+    // Arşivdeki öğrenci düzenlenemez (önce arşivden çıkarılmalı).
+    .is("arsivlendi_at", null)
     .select("id");
 
   if (error || !data?.length) {

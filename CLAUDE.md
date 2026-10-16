@@ -70,7 +70,7 @@ Kullanıcıyla 10 aşamalı bir plan üzerinde çalışılıyor; her aşama sonu
   `takvimDersleriniGetir` server action'ını çağırır (önce `dersleri_uret`).
   Grup detay sayfasında "Haftalık program" kartı: ekle / düzenle
   (bugünden itibaren geçerli) / sonlandır. Migration 0007.
-- [x] **Aşama 6 — Yoklama ve Bugün sayfası** (kullanıcı onayı bekleniyor):
+- [x] **Aşama 6 — Yoklama ve Bugün sayfası**:
   `/` (Bugün): bugünün ve son 30 günün eksik derslerini üretir
   (`dersleri_uret`), bugünün dersleri için kart başına yoklama formu
   (Geldi/Gelmedi, varsayılan "geldi"), sağda son 30 günün yoklaması
@@ -82,8 +82,18 @@ Kullanıcıyla 10 aşamalı bir plan üzerinde çalışılıyor; her aşama sonu
   ders → `yapildi`; iptal/gelecek ders ve ücret ayarı yoksa reddeder),
   `yoklamayiGeriAl` (yoklamaları siler, ders → `planli`). Öğrenci detayında
   "Ders geçmişi" tablosu.
-- [ ] **Aşama 7 — Ödemeler ve Borçlar** (sıradaki)
-- [ ] **Aşama 8 — Arşivleme ve kalıcı silme**
+- [x] **Aşama 7 — Ödemeler ve Borçlar** (kullanıcı onayı bekleniyor):
+  `/odemeler`: `?ay=yyyy-MM` ile ay ay gezinme, aylık toplam + yönteme göre
+  dağılım, ödeme ekle/düzenle/sil (`src/actions/odemeler.ts`; ileri tarih
+  reddedilir). `/borclar`: `ogrenci_bakiyeleri` view'ından borçlular
+  (arşivdekiler "Arşivde" etiketiyle), toplam alacak, satır başına
+  "Ödeme al" (borcun tamamı önerilir) ve veli (yoksa öğrenci) telefonuna
+  `wa.me` hatırlatma bağlantısı; fazla ödeme yapanlar ayrı listede.
+  Öğrenci detayında ödeme geçmişi + "Ödeme al". Ödeme formundaki öğrenci
+  listesi `odemeOgrenciSecenekleri()`: aktifler + bakiyesi sıfır olmayan
+  arşivdekiler. Öğrenci detay sayfası arşivdeki öğrenciyi de gösterir
+  (düzenleme kapalı; `ogrenciGuncelle` de arşivdekini reddeder).
+- [ ] **Aşama 8 — Arşivleme ve kalıcı silme** (sıradaki)
 - [ ] **Aşama 9 — Yönetim paneli**
 - [ ] **Aşama 10 — Son kontrol** (RLS testi, ücret senaryoları, README)
 

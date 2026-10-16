@@ -1,8 +1,16 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeftIcon, PencilIcon } from "lucide-react";
+import { ArrowLeftIcon, PencilIcon, WalletIcon } from "lucide-react";
 import { cn } from "cn";
 import { oturumGetir } from "@/lib/auth/oturum";
+import { odemeOgrenciSecenekleri } from "@/lib/ogrenci-secenekleri";
+import type { OdemeYontemi } from "@/lib/validasyon/odeme";
+import { bugununTarihi } from "@/lib/zaman/istanbul";
+import { OdemeFormuDialog } from "@/components/odemeler/odeme-formu-dialog";
+import {
+  OdemeTablosu,
+  type OdemeSatiri,
+} from "@/components/odemeler/odeme-tablosu";
 import { paraFormatla } from "@/lib/para";
 import { telefonFormatla } from "@/lib/telefon";
 import { SayfaBasligi } from "@/components/yerlesim/sayfa-basligi";
@@ -50,36 +58,60 @@ export default async function OgrenciDetaySayfasi({
   const { data: ogrenci } = await supabase
     .from("ogrenciler")
     .select(
-      "id, ad_soyad, telefon, veli_ad, veli_telefon, grup_id, notlar, gruplar(id, ad, renk)",
+      "id, ad_soyad, telefon, veli_ad, veli_telefon, grup_id, notlar, arsivlendi_at, gruplar(id, ad, renk)",
     )
     .eq("id", id)
     .eq("hoca_id", kullanici.id)
-    .is("arsivlendi_at", null)
     .maybeSingle();
 
   if (!ogrenci) notFound();
+  const arsivde = ogrenci.arsivlendi_at !== null;
 
-  const [{ data: gruplar }, { data: bakiye }, { data: yoklamalar }] =
-    await Promise.all([
-      supabase
-        .from("gruplar")
-        .select("id, ad")
-        .eq("hoca_id", kullanici.id)
-        .is("arsivlendi_at", null)
-        .order("ad"),
-      supabase
-        .from("ogrenci_bakiyeleri")
-        .select("toplam_tahakkuk, toplam_odeme, bakiye")
-        .eq("ogrenci_id", ogrenci.id)
-        .maybeSingle(),
-      supabase
-        .from("yoklamalar")
-        .select(
-          "durum, ucret, dersler(id, tarih, baslangic_saati, gruplar(ad, renk))",
-        )
-        .eq("ogrenci_id", ogrenci.id)
-        .eq("hoca_id", kullanici.id),
-    ]);
+  const bugun = bugununTarihi();
+  const [
+    { data: gruplar },
+    { data: bakiye },
+    { data: yoklamalar },
+    { data: odemeler },
+    odemeSecenekleri,
+  ] = await Promise.all([
+    supabase
+      .from("gruplar")
+      .select("id, ad")
+      .eq("hoca_id", kullanici.id)
+      .is("arsivlendi_at", null)
+      .order("ad"),
+    supabase
+      .from("ogrenci_bakiyeleri")
+      .select("toplam_tahakkuk, toplam_odeme, bakiye")
+      .eq("ogrenci_id", ogrenci.id)
+      .maybeSingle(),
+    supabase
+      .from("yoklamalar")
+      .select(
+        "durum, ucret, dersler(id, tarih, baslangic_saati, gruplar(ad, renk))",
+      )
+      .eq("ogrenci_id", ogrenci.id)
+      .eq("hoca_id", kullanici.id),
+    supabase
+      .from("odemeler")
+      .select("id, tutar, tarih, odeme_yontemi, aciklama")
+      .eq("ogrenci_id", ogrenci.id)
+      .eq("hoca_id", kullanici.id)
+      .order("tarih", { ascending: false })
+      .order("created_at", { ascending: false }),
+    odemeOgrenciSecenekleri(),
+  ]);
+
+  const odemeGecmisi: OdemeSatiri[] = (odemeler ?? []).map((o) => ({
+    id: o.id,
+    ogrenciId: ogrenci.id,
+    ogrenciAdi: ogrenci.ad_soyad,
+    tutar: o.tutar,
+    tarih: o.tarih,
+    odemeYontemi: o.odeme_yontemi as OdemeYontemi,
+    aciklama: o.aciklama,
+  }));
 
   const guncelBakiye = bakiye?.bakiye ?? 0;
 
@@ -110,17 +142,39 @@ export default async function OgrenciDetaySayfasi({
         Öğrenciler
       </Link>
 
-      <SayfaBasligi baslik={ogrenci.ad_soyad}>
-        <OgrenciFormuDialog
-          ogrenci={ogrenci}
-          gruplar={gruplar ?? []}
-          tetikleyici={
-            <Button variant="outline">
-              <PencilIcon />
-              Düzenle
-            </Button>
-          }
-        />
+      <SayfaBasligi
+        baslik={ogrenci.ad_soyad}
+        aciklama={
+          arsivde
+            ? "Bu öğrenci arşivde; bilgileri düzenlenemez, kalan borcu için ödeme alınabilir."
+            : undefined
+        }
+      >
+        {!arsivde ? (
+          <OgrenciFormuDialog
+            ogrenci={ogrenci}
+            gruplar={gruplar ?? []}
+            tetikleyici={
+              <Button variant="outline">
+                <PencilIcon />
+                Düzenle
+              </Button>
+            }
+          />
+        ) : null}
+        {odemeSecenekleri.some((o) => o.id === ogrenci.id) ? (
+          <OdemeFormuDialog
+            ogrenciler={odemeSecenekleri}
+            bugun={bugun}
+            varsayilanOgrenciId={ogrenci.id}
+            tetikleyici={
+              <Button>
+                <WalletIcon />
+                Ödeme al
+              </Button>
+            }
+          />
+        ) : null}
       </SayfaBasligi>
 
       <div className="grid gap-4 lg:grid-cols-3">
@@ -206,13 +260,27 @@ export default async function OgrenciDetaySayfasi({
         </Card>
       </div>
 
-      <div className="mt-4">
+      <div className="mt-4 grid items-start gap-4 xl:grid-cols-2">
         <DersGecmisi satirlar={dersGecmisi} />
-      </div>
 
-      <p className="mt-4 text-sm text-muted-foreground">
-        Ödeme geçmişi, ödeme ekranı eklendiğinde (Aşama 7) burada listelenecek.
-      </p>
+        <Card className="pb-0">
+          <CardHeader>
+            <CardTitle>Ödeme geçmişi</CardTitle>
+          </CardHeader>
+          {odemeGecmisi.length === 0 ? (
+            <CardContent className="pb-4 text-sm text-muted-foreground">
+              Henüz ödeme yok.
+            </CardContent>
+          ) : (
+            <OdemeTablosu
+              odemeler={odemeGecmisi}
+              ogrenciler={odemeSecenekleri}
+              bugun={bugun}
+              ogrenciKolonu={false}
+            />
+          )}
+        </Card>
+      </div>
     </>
   );
 }
