@@ -5,6 +5,7 @@ import Link from "next/link";
 import {
   BanIcon,
   CalendarIcon,
+  ClipboardCheckIcon,
   ClockIcon,
   PencilIcon,
   RepeatIcon,
@@ -18,10 +19,10 @@ import {
   type DersDurumu,
   type TakvimDersi,
 } from "@/actions/dersler";
-import { tarihFormatla } from "@/lib/zaman/istanbul";
+import { bugununTarihi, tarihFormatla } from "@/lib/zaman/istanbul";
 import { RenkNoktasi } from "@/components/gruplar/renk-noktasi";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -75,7 +76,10 @@ export function DersDetayDialog({
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <RenkNoktasi renk={ders.renk} className="size-3" />
-                <Link href={`/gruplar/${ders.grupId}`} className="hover:underline">
+                <Link
+                  href={`/gruplar/${ders.grupId}`}
+                  className="hover:underline"
+                >
                   {ders.grupAdi}
                 </Link>
               </DialogTitle>
@@ -125,7 +129,9 @@ export function DersDetayDialog({
                   <Button
                     variant="destructive"
                     disabled={beklemede}
-                    onClick={() => islemYap(() => dersSil(ders.id), "Ders silindi.")}
+                    onClick={() =>
+                      islemYap(() => dersSil(ders.id), "Ders silindi.")
+                    }
                   >
                     <Trash2Icon />
                     Sil
@@ -163,10 +169,27 @@ export function DersDetayDialog({
                   )
                 ) : null}
               </div>
-              <Button disabled={beklemede} onClick={() => duzenle(ders)}>
-                <PencilIcon />
-                Düzenle
-              </Button>
+              <div className="flex flex-col-reverse gap-2 sm:flex-row">
+                <Button
+                  variant="outline"
+                  disabled={beklemede}
+                  onClick={() => duzenle(ders)}
+                >
+                  <PencilIcon />
+                  Düzenle
+                </Button>
+                {ders.durum !== "iptal" && ders.tarih <= bugununTarihi() ? (
+                  <Link
+                    href={`/dersler/${ders.id}`}
+                    className={buttonVariants()}
+                  >
+                    <ClipboardCheckIcon />
+                    {ders.yoklamaVar || ders.durum === "yapildi"
+                      ? "Yoklamayı gör"
+                      : "Yoklama al"}
+                  </Link>
+                ) : null}
+              </div>
             </DialogFooter>
           </>
         ) : null}

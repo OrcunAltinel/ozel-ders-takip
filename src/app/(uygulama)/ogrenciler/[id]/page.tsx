@@ -8,13 +8,12 @@ import { telefonFormatla } from "@/lib/telefon";
 import { SayfaBasligi } from "@/components/yerlesim/sayfa-basligi";
 import { RenkNoktasi } from "@/components/gruplar/renk-noktasi";
 import { OgrenciFormuDialog } from "@/components/ogrenciler/ogrenci-formu-dialog";
-import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  DersGecmisi,
+  type DersGecmisiSatiri,
+} from "@/components/ogrenciler/ders-gecmisi";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 function Bilgi({
   etiket,
@@ -60,21 +59,46 @@ export default async function OgrenciDetaySayfasi({
 
   if (!ogrenci) notFound();
 
-  const [{ data: gruplar }, { data: bakiye }] = await Promise.all([
-    supabase
-      .from("gruplar")
-      .select("id, ad")
-      .eq("hoca_id", kullanici.id)
-      .is("arsivlendi_at", null)
-      .order("ad"),
-    supabase
-      .from("ogrenci_bakiyeleri")
-      .select("toplam_tahakkuk, toplam_odeme, bakiye")
-      .eq("ogrenci_id", ogrenci.id)
-      .maybeSingle(),
-  ]);
+  const [{ data: gruplar }, { data: bakiye }, { data: yoklamalar }] =
+    await Promise.all([
+      supabase
+        .from("gruplar")
+        .select("id, ad")
+        .eq("hoca_id", kullanici.id)
+        .is("arsivlendi_at", null)
+        .order("ad"),
+      supabase
+        .from("ogrenci_bakiyeleri")
+        .select("toplam_tahakkuk, toplam_odeme, bakiye")
+        .eq("ogrenci_id", ogrenci.id)
+        .maybeSingle(),
+      supabase
+        .from("yoklamalar")
+        .select(
+          "durum, ucret, dersler(id, tarih, baslangic_saati, gruplar(ad, renk))",
+        )
+        .eq("ogrenci_id", ogrenci.id)
+        .eq("hoca_id", kullanici.id),
+    ]);
 
   const guncelBakiye = bakiye?.bakiye ?? 0;
+
+  const dersGecmisi: DersGecmisiSatiri[] = (yoklamalar ?? [])
+    .filter((y) => y.dersler)
+    .map((y) => ({
+      dersId: y.dersler!.id,
+      tarih: y.dersler!.tarih,
+      baslangicSaati: y.dersler!.baslangic_saati,
+      grupAdi: y.dersler!.gruplar?.ad ?? "",
+      renk: y.dersler!.gruplar?.renk ?? "#4b5563",
+      durum: y.durum as DersGecmisiSatiri["durum"],
+      ucret: y.ucret,
+    }))
+    .sort((a, b) =>
+      `${b.tarih}${b.baslangicSaati}`.localeCompare(
+        `${a.tarih}${a.baslangicSaati}`,
+      ),
+    );
 
   return (
     <>
@@ -182,9 +206,12 @@ export default async function OgrenciDetaySayfasi({
         </Card>
       </div>
 
-      <p className="mt-6 text-sm text-muted-foreground">
-        Ders ve ödeme geçmişi, yoklama ve ödeme ekranları eklendiğinde
-        (Aşama 6–7) burada listelenecek.
+      <div className="mt-4">
+        <DersGecmisi satirlar={dersGecmisi} />
+      </div>
+
+      <p className="mt-4 text-sm text-muted-foreground">
+        Ödeme geçmişi, ödeme ekranı eklendiğinde (Aşama 7) burada listelenecek.
       </p>
     </>
   );

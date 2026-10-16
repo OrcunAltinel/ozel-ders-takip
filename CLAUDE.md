@@ -60,7 +60,8 @@ Kullanıcıyla 10 aşamalı bir plan üzerinde çalışılıyor; her aşama sonu
   **Kullanıcı isteğiyle değişti:** ders ücreti öğrenci bazında DEĞİL, hoca
   bazında tek bir değer (`hoca_ayarlari.ders_ucreti`, `/ayarlar` sayfası);
   tüm öğrenciler için aynı. Öğrenci formunda ücret alanı yok.
-- [x] **Aşama 5 — Dersler ve Takvim** (kullanıcı onayı bekleniyor):
+- [x] **Aşama 5 — Dersler ve Takvim**: (kullanıcı isteğiyle: ders kutularında
+  her görünümde "10:00–16:30" biçiminde bitiş saati de gösterilir, `eventContent`)
   `/takvim` (FullCalendar; masaüstünde hafta, mobilde liste görünümü,
   `next/dynamic` ile `ssr:false`). Boş saate tıkla → yeni ders (tek seferlik
   veya "Her hafta tekrarla" → `ders_programlari` satırı). Derse tıkla →
@@ -69,8 +70,19 @@ Kullanıcıyla 10 aşamalı bir plan üzerinde çalışılıyor; her aşama sonu
   `takvimDersleriniGetir` server action'ını çağırır (önce `dersleri_uret`).
   Grup detay sayfasında "Haftalık program" kartı: ekle / düzenle
   (bugünden itibaren geçerli) / sonlandır. Migration 0007.
-- [ ] **Aşama 6 — Yoklama ve Bugün sayfası** (sıradaki)
-- [ ] **Aşama 7 — Ödemeler ve Borçlar**
+- [x] **Aşama 6 — Yoklama ve Bugün sayfası** (kullanıcı onayı bekleniyor):
+  `/` (Bugün): bugünün ve son 30 günün eksik derslerini üretir
+  (`dersleri_uret`), bugünün dersleri için kart başına yoklama formu
+  (Geldi/Gelmedi, varsayılan "geldi"), sağda son 30 günün yoklaması
+  alınmamış dersleri. `/dersler/[id]`: tek dersin yoklama sayfası (takvim
+  detayındaki "Yoklama al/gör" ve öğrenci ders geçmişi buraya bağlanır).
+  Veri: `src/lib/yoklama-verisi.ts` (grubun güncel üyeleri + o derste
+  yoklaması olup gruptan ayrılmış öğrenciler). Action'lar
+  `src/actions/yoklama.ts`: `yoklamaKaydet` (upsert `ders_id,ogrenci_id`,
+  ders → `yapildi`; iptal/gelecek ders ve ücret ayarı yoksa reddeder),
+  `yoklamayiGeriAl` (yoklamaları siler, ders → `planli`). Öğrenci detayında
+  "Ders geçmişi" tablosu.
+- [ ] **Aşama 7 — Ödemeler ve Borçlar** (sıradaki)
 - [ ] **Aşama 8 — Arşivleme ve kalıcı silme**
 - [ ] **Aşama 9 — Yönetim paneli**
 - [ ] **Aşama 10 — Son kontrol** (RLS testi, ücret senaryoları, README)
