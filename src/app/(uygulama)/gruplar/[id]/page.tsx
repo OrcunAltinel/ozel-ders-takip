@@ -5,6 +5,7 @@ import { oturumGetir } from "@/lib/auth/oturum";
 import { telefonFormatla } from "@/lib/telefon";
 import { bugununTarihi } from "@/lib/zaman/istanbul";
 import { HaftalikProgram } from "@/components/gruplar/haftalik-program";
+import { GrupArsivleButonu } from "@/components/arsiv/grup-arsiv-butonlari";
 import { SayfaBasligi } from "@/components/yerlesim/sayfa-basligi";
 import { GrupFormuDialog } from "@/components/gruplar/grup-formu-dialog";
 import { RenkNoktasi } from "@/components/gruplar/renk-noktasi";
@@ -87,6 +88,16 @@ export default async function GrupDetaySayfasi({
               <PencilIcon />
               Düzenle
             </Button>
+          }
+        />
+        <GrupArsivleButonu
+          grupId={grup.id}
+          grupAdi={grup.ad}
+          ogrenciSayisi={uyeler.length}
+          programSayisi={
+            (programlar ?? []).filter(
+              (p) => p.bitis_tarihi === null || p.bitis_tarihi >= bugun,
+            ).length
           }
         />
         <GrubaOgrenciEkle grupId={grup.id} adaylar={adaylar} />

@@ -17,6 +17,11 @@ import { SayfaBasligi } from "@/components/yerlesim/sayfa-basligi";
 import { RenkNoktasi } from "@/components/gruplar/renk-noktasi";
 import { OgrenciFormuDialog } from "@/components/ogrenciler/ogrenci-formu-dialog";
 import {
+  OgrenciArsivdenCikarButonu,
+  OgrenciArsivleButonu,
+  OgrenciKaliciSilButonu,
+} from "@/components/arsiv/ogrenci-arsiv-butonlari";
+import {
   DersGecmisi,
   type DersGecmisiSatiri,
 } from "@/components/ogrenciler/ders-gecmisi";
@@ -58,7 +63,7 @@ export default async function OgrenciDetaySayfasi({
   const { data: ogrenci } = await supabase
     .from("ogrenciler")
     .select(
-      "id, ad_soyad, telefon, veli_ad, veli_telefon, grup_id, notlar, arsivlendi_at, gruplar(id, ad, renk)",
+      "id, ad_soyad, telefon, veli_ad, veli_telefon, grup_id, notlar, arsivlendi_at, gruplar(id, ad, renk, arsivlendi_at)",
     )
     .eq("id", id)
     .eq("hoca_id", kullanici.id)
@@ -146,7 +151,9 @@ export default async function OgrenciDetaySayfasi({
         baslik={ogrenci.ad_soyad}
         aciklama={
           arsivde
-            ? "Bu öğrenci arşivde; bilgileri düzenlenemez, kalan borcu için ödeme alınabilir."
+            ? `Bu öğrenci arşivde; bilgileri düzenlenemez${
+                guncelBakiye > 0 ? ", kalan borcu için ödeme alınabilir" : ""
+              }.`
             : undefined
         }
       >
@@ -162,6 +169,24 @@ export default async function OgrenciDetaySayfasi({
             }
           />
         ) : null}
+        {arsivde ? (
+          <>
+            <OgrenciArsivdenCikarButonu ogrenciId={ogrenci.id} />
+            {dersGecmisi.length === 0 && odemeGecmisi.length === 0 ? (
+              <OgrenciKaliciSilButonu
+                ogrenciId={ogrenci.id}
+                adSoyad={ogrenci.ad_soyad}
+                yonlendir="/arsiv"
+              />
+            ) : null}
+          </>
+        ) : (
+          <OgrenciArsivleButonu
+            ogrenciId={ogrenci.id}
+            adSoyad={ogrenci.ad_soyad}
+            bakiye={guncelBakiye}
+          />
+        )}
         {odemeSecenekleri.some((o) => o.id === ogrenci.id) ? (
           <OdemeFormuDialog
             ogrenciler={odemeSecenekleri}
@@ -185,7 +210,13 @@ export default async function OgrenciDetaySayfasi({
           <CardContent>
             <dl className="grid gap-4 text-sm sm:grid-cols-2">
               <Bilgi etiket="Grup">
-                {ogrenci.gruplar ? (
+                {ogrenci.gruplar?.arsivlendi_at ? (
+                  <span className="inline-flex items-center gap-1.5">
+                    <RenkNoktasi renk={ogrenci.gruplar.renk} />
+                    {ogrenci.gruplar.ad}
+                    <span className="text-muted-foreground">(arşivde)</span>
+                  </span>
+                ) : ogrenci.gruplar ? (
                   <Link
                     href={`/gruplar/${ogrenci.gruplar.id}`}
                     className="inline-flex items-center gap-1.5 hover:underline"

@@ -427,6 +427,10 @@ export type Database = {
         Args: { p_baslangic: string; p_bitis: string }
         Returns: undefined
       }
+      grubu_arsivle: {
+        Args: { p_grup_id: string; p_ogrencileri_de_arsivle: boolean }
+        Returns: undefined
+      }
       is_yonetici: { Args: never; Returns: boolean }
       program_derslerini_temizle: {
         Args: { p_program_id: string; p_tarihten: string }

@@ -82,7 +82,7 @@ Kullanıcıyla 10 aşamalı bir plan üzerinde çalışılıyor; her aşama sonu
   ders → `yapildi`; iptal/gelecek ders ve ücret ayarı yoksa reddeder),
   `yoklamayiGeriAl` (yoklamaları siler, ders → `planli`). Öğrenci detayında
   "Ders geçmişi" tablosu.
-- [x] **Aşama 7 — Ödemeler ve Borçlar** (kullanıcı onayı bekleniyor):
+- [x] **Aşama 7 — Ödemeler ve Borçlar**:
   `/odemeler`: `?ay=yyyy-MM` ile ay ay gezinme, aylık toplam + yönteme göre
   dağılım, ödeme ekle/düzenle/sil (`src/actions/odemeler.ts`; ileri tarih
   reddedilir). `/borclar`: `ogrenci_bakiyeleri` view'ından borçlular
@@ -93,8 +93,18 @@ Kullanıcıyla 10 aşamalı bir plan üzerinde çalışılıyor; her aşama sonu
   listesi `odemeOgrenciSecenekleri()`: aktifler + bakiyesi sıfır olmayan
   arşivdekiler. Öğrenci detay sayfası arşivdeki öğrenciyi de gösterir
   (düzenleme kapalı; `ogrenciGuncelle` de arşivdekini reddeder).
-- [ ] **Aşama 8 — Arşivleme ve kalıcı silme** (sıradaki)
-- [ ] **Aşama 9 — Yönetim paneli**
+- [x] **Aşama 8 — Arşivleme ve kalıcı silme** (kullanıcı onayı bekleniyor):
+  `src/actions/arsiv.ts`. Öğrenci: detay sayfasından "Arşivle"; arşivdeyken
+  "Arşivden çıkar" (eski grubu arşivdeyse grupsuz döner) ve geçmişi yoksa
+  "Kalıcı sil". Grup: detay sayfasından "Arşivle" → `grubu_arsivle()` (0008,
+  tek işlem): aktif programları bugün `programi_sonlandir` ile bitirir,
+  gelecekteki yoklamasız dersleri siler, gruptaki aktif öğrencileri grupsuz
+  bırakır veya ("Öğrencileri de arşivle") arşivler. Grup arşivden çıkınca
+  program/öğrenci geri gelmez. `/arsiv`: arşivdeki öğrenciler (bakiye) ve
+  gruplar (ders sayısı); kalıcı silme YALNIZCA arşivdeki ve geçmişi
+  (yoklama/ödeme; grup için ders) olmayan kayıtlar için — DB'de de
+  `ON DELETE RESTRICT`. Ortak onay bileşeni `components/arsiv/onay-dialog.tsx`.
+- [ ] **Aşama 9 — Yönetim paneli** (sıradaki)
 - [ ] **Aşama 10 — Son kontrol** (RLS testi, ücret senaryoları, README)
 
 ## Veritabanı şeması (özet)
