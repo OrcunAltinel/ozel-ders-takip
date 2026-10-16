@@ -11,6 +11,7 @@ import type {
   DateSelectArg,
   EventChangeArg,
   EventClickArg,
+  EventContentArg,
   EventInput,
   EventSourceFuncArg,
 } from "@fullcalendar/core";
@@ -48,6 +49,25 @@ function dersiEtkinligeCevir(ders: TakvimDersi): EventInput {
     classNames: [`ders-${ders.durum}`],
     extendedProps: { ders },
   };
+}
+
+/**
+ * Ders kutusunun içeriği: her görünümde (kısa dersler ve dar telefon
+ * ekranı dahil) "16:00–17:30" biçiminde başlangıç VE bitiş saati gösterilir.
+ * Liste görünümü saat aralığını zaten kendi sütununda gösterdiği için
+ * varsayılan içerik kullanılır.
+ */
+function etkinlikIcerigi(arg: EventContentArg) {
+  if (arg.view.type.startsWith("list")) return true;
+  const ders = arg.event.extendedProps.ders as TakvimDersi;
+  return (
+    <div className="overflow-hidden px-0.5 text-[0.75rem] leading-tight">
+      <div className="font-semibold whitespace-nowrap">
+        {ders.baslangicSaati}–{ders.bitisSaati}
+      </div>
+      <div className="truncate">{arg.event.title}</div>
+    </div>
+  );
 }
 
 type FormDurumu =
@@ -200,6 +220,9 @@ export function Takvim({
           scrollTime="14:00:00"
           slotLabelFormat={SAAT_BICIMI}
           eventTimeFormat={SAAT_BICIMI}
+          displayEventEnd
+          eventDisplay="block"
+          eventContent={etkinlikIcerigi}
           nowIndicator
           dayMaxEvents={3}
           selectable

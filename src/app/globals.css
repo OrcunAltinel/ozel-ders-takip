@@ -172,3 +172,7 @@
 .takvim .fc-event.ders-yapildi .fc-event-title::before {
   content: "✓ ";
 }
+.takvim .fc a {
+  color: inherit;
+  text-decoration: none;
+}
