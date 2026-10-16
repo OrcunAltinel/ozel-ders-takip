@@ -7,7 +7,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
+  --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-heading: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);
@@ -127,4 +127,48 @@
   html {
     @apply font-sans;
   }
+}
+/* FullCalendar: uygulama temasına uyum */
+.takvim {
+  --fc-border-color: var(--border);
+  --fc-page-bg-color: var(--card);
+  --fc-neutral-bg-color: var(--muted);
+  --fc-list-event-hover-bg-color: var(--muted);
+  --fc-today-bg-color: color-mix(in oklch, var(--primary) 6%, transparent);
+  --fc-now-indicator-color: var(--destructive);
+  --fc-button-bg-color: var(--background);
+  --fc-button-border-color: var(--border);
+  --fc-button-text-color: var(--foreground);
+  --fc-button-hover-bg-color: var(--muted);
+  --fc-button-hover-border-color: var(--border);
+  --fc-button-active-bg-color: var(--primary);
+  --fc-button-active-border-color: var(--primary);
+  font-size: 0.875rem;
+}
+.takvim .fc .fc-button {
+  padding: 0.3rem 0.6rem;
+  font-size: 0.8125rem;
+  border-radius: calc(var(--radius) * 0.8);
+  box-shadow: none !important;
+}
+.takvim .fc .fc-button-primary:not(:disabled).fc-button-active,
+.takvim .fc .fc-button-primary:not(:disabled):active {
+  color: var(--primary-foreground);
+}
+.takvim .fc .fc-toolbar-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+.takvim .fc .fc-toolbar.fc-header-toolbar {
+  margin-bottom: 0.75rem;
+}
+.takvim .fc-event {
+  cursor: pointer;
+}
+.takvim .fc-event.ders-iptal {
+  opacity: 0.45;
+  text-decoration: line-through;
+}
+.takvim .fc-event.ders-yapildi .fc-event-title::before {
+  content: "✓ ";
 }

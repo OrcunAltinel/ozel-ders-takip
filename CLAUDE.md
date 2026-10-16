@@ -47,8 +47,7 @@ Kullanıcıyla 10 aşamalı bir plan üzerinde çalışılıyor; her aşama sonu
   (giriş yönlendirmesi), `npm run ilk-yonetici` scripti. Uçtan uca test
   edildi (gerçek Supabase projesinde geçici bir hesapla: giriş, pasif/banned
   kullanıcı reddi, middleware yönlendirmesi — sonra temizlendi).
-- [x] **Aşama 4 — Ana yerleşim + Gruplar ve Öğrenciler** (kullanıcı onayı
-  bekleniyor): `src/app/(uygulama)/` route grubu + ortak layout (masaüstünde
+- [x] **Aşama 4 — Ana yerleşim + Gruplar ve Öğrenciler**: `src/app/(uygulama)/` route grubu + ortak layout (masaüstünde
   kenar çubuğu, mobilde Sheet menü, kullanıcı menüsü/çıkış). `oturumGetir()`
   (`src/lib/auth/oturum.ts`, React `cache`) profili yükler; profili olmayan
   veya pasif kullanıcıyı `/cikis` route handler'ına gönderir. Gruplar:
@@ -58,8 +57,19 @@ Kullanıcıyla 10 aşamalı bir plan üzerinde çalışılıyor; her aşama sonu
   Henüz yazılmamış sayfalar (`Yakinda` bileşeni) "Aşama X'te eklenecek"
   gösterir. `/yonetim` yönetici olmayanlara 404 döner. Arşivleme/silme
   Aşama 8'e bırakıldı (listeler `arsivlendi_at is null` filtreler).
-- [ ] **Aşama 5 — Dersler ve Takvim** (sıradaki)
-- [ ] **Aşama 6 — Yoklama ve Bugün sayfası**
+  **Kullanıcı isteğiyle değişti:** ders ücreti öğrenci bazında DEĞİL, hoca
+  bazında tek bir değer (`hoca_ayarlari.ders_ucreti`, `/ayarlar` sayfası);
+  tüm öğrenciler için aynı. Öğrenci formunda ücret alanı yok.
+- [x] **Aşama 5 — Dersler ve Takvim** (kullanıcı onayı bekleniyor):
+  `/takvim` (FullCalendar; masaüstünde hafta, mobilde liste görünümü,
+  `next/dynamic` ile `ssr:false`). Boş saate tıkla → yeni ders (tek seferlik
+  veya "Her hafta tekrarla" → `ders_programlari` satırı). Derse tıkla →
+  detay (iptal et/geri al, düzenle, tek seferlikse sil). Sürükle-bırak /
+  boyutlandırma `dersGuncelle` çağırır. Takvim her aralık değişiminde
+  `takvimDersleriniGetir` server action'ını çağırır (önce `dersleri_uret`).
+  Grup detay sayfasında "Haftalık program" kartı: ekle / düzenle
+  (bugünden itibaren geçerli) / sonlandır. Migration 0007.
+- [ ] **Aşama 6 — Yoklama ve Bugün sayfası** (sıradaki)
 - [ ] **Aşama 7 — Ödemeler ve Borçlar**
 - [ ] **Aşama 8 — Arşivleme ve kalıcı silme**
 - [ ] **Aşama 9 — Yönetim paneli**
@@ -75,11 +85,26 @@ Kullanıcıyla 10 aşamalı bir plan üzerinde çalışılıyor; her aşama sonu
   (geçmişi olan kayıt kalıcı silinemez kuralını DB seviyesinde garanti eder).
 - Çapraz-hoca tutarlılık trigger'ları: bir hocanın `grup_id`/`ogrenci_id`/
   `program_id` alanına başka hocaya ait bir kayıt bağlanamaz.
-- `yoklamalar.ucret`: ilk INSERT'te `ogrenciler.ders_ucreti`'nden kopyalanır,
-  sonraki her UPDATE'te eski değer korunur (trigger ile, istemci ne
-  gönderirse göndersin).
+- `yoklamalar.ucret`: ilk INSERT'te `hoca_ayarlari.ders_ucreti`'nden
+  kopyalanır (ayar yoksa INSERT hata verir), sonraki her UPDATE'te eski
+  değer korunur (trigger ile, istemci ne gönderirse göndersin).
+  `ogrenciler.ders_ucreti` sütunu 0006'dan beri KULLANILMIYOR (nullable);
+  silme migration'ı otomatik onaydan geçmediği için bırakıldı — kullanıcı
+  isterse `alter table ogrenciler drop column ders_ucreti` ile kaldırılabilir.
 - `dersleri_uret(p_baslangic, p_bitis)`: tekrarlayan programlardan eksik
-  dersleri idempotent üretir (`unique(program_id, tarih)` sayesinde).
+  dersleri idempotent üretir. Benzersizlik `unique(program_id, program_tarihi)`
+  üzerinden: `program_tarihi` dersin programdaki ASIL tarihidir, ders başka
+  güne taşınsa da değişmez (aksi halde eski güne ders yeniden üretilirdi).
+  En fazla 100 günlük aralık kabul eder.
+- Yoklaması olan ders silinemez (trigger `dersler_yoklamali_silinemez`).
+- `program_derslerini_temizle(program, tarihten)`: programın o tarihten
+  sonraki yoklamasız planlı/iptal derslerini siler (program düzenlenince
+  bugünden itibaren çağrılır, dersler yeni bilgilerle yeniden üretilir).
+  `programi_sonlandir(program, son_tarih)`: sonrasını temizler; hiç dersi
+  kalmadıysa programı siler, yoksa `bitis_tarihi` ayarlar.
+- Programdan gelen tek bir ders SİLİNMEZ (yeniden üretilirdi), iptal edilir.
+  Başlamış bir programın düzenlenmesinde `baslangic_tarihi` bugüne çekilir
+  (geçmiş haftalara yeni günde ders üretilmesin diye).
 - Her tabloda RLS: hoca kendi `hoca_id = auth.uid()` satırlarında tam CRUD,
   `is_yonetici()` (security definer) ile yönetici tüm satırları salt okur.
 
@@ -124,7 +149,17 @@ Kullanıcıyla 10 aşamalı bir plan üzerinde çalışılıyor; her aşama sonu
    string değer taşıyamaz → "grupsuz"/"tümü" için sentinel değer kullanılır;
    seçili etiketin görünmesi için `Select`'e `items` prop'u verilir.
    Tutar girişi `tutarCozumle()` ile ("750", "750,50", "1.250,50").
-9. **npm install'lar `--legacy-peer-deps` ile yapılıyor** (zod v3/v4 ve
+9. **`npm run build` çalışan `npm run dev`'i bozar** (ikisi de `.next`
+   klasörünü kullanır; kullanıcının dev sunucusu 500 vermeye başlar). Test
+   build'leri için `NEXT_DIST_DIR=.next-test npm run build` ve
+   `NEXT_DIST_DIR=.next-test npx next start -p 3123` kullan (`next.config.ts`
+   `distDir`'i bu env'den okur; `.next-*` gitignore/eslint'te yok sayılır).
+   Next, bu build sırasında `tsconfig.json`'a `.next-test/types` ekler —
+   commit'lemeden önce geri al. Kullanıcının tarayıcısında localhost'ta
+   kendi oturumu açık olabilir (çerezler portlar arası paylaşılır).
+10. **Font**: `globals.css`'teki `--font-sans` `var(--font-geist-sans)`'e
+   işaret etmeli (Aşama 1'de kendine referans veriyordu → serif'e düşüyordu).
+11. **npm install'lar `--legacy-peer-deps` ile yapılıyor** (zod v3/v4 ve
    React 19 ekosistemindeki peer dependency sürtüşmeleri nedeniyle).
 
 ## Komutlar

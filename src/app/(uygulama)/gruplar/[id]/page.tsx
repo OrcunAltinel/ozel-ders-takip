@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { ArrowLeftIcon, PencilIcon } from "lucide-react";
 import { oturumGetir } from "@/lib/auth/oturum";
 import { telefonFormatla } from "@/lib/telefon";
+import { bugununTarihi } from "@/lib/zaman/istanbul";
+import { HaftalikProgram } from "@/components/gruplar/haftalik-program";
 import { SayfaBasligi } from "@/components/yerlesim/sayfa-basligi";
 import { GrupFormuDialog } from "@/components/gruplar/grup-formu-dialog";
 import { RenkNoktasi } from "@/components/gruplar/renk-noktasi";
@@ -39,12 +41,24 @@ export default async function GrupDetaySayfasi({
 
   // Hocanın tüm aktif öğrencileri: hem bu grubun üyeleri hem de
   // "Öğrenci ekle" listesindeki adaylar için kullanılır.
-  const { data: ogrenciler } = await supabase
-    .from("ogrenciler")
-    .select("id, ad_soyad, telefon, grup_id, gruplar(ad)")
-    .eq("hoca_id", kullanici.id)
-    .is("arsivlendi_at", null)
-    .order("ad_soyad");
+  const [{ data: ogrenciler }, { data: programlar }] = await Promise.all([
+    supabase
+      .from("ogrenciler")
+      .select("id, ad_soyad, telefon, grup_id, gruplar(ad)")
+      .eq("hoca_id", kullanici.id)
+      .is("arsivlendi_at", null)
+      .order("ad_soyad"),
+    supabase
+      .from("ders_programlari")
+      .select(
+        "id, haftanin_gunu, baslangic_saati, bitis_saati, baslangic_tarihi, bitis_tarihi",
+      )
+      .eq("grup_id", grup.id)
+      .eq("hoca_id", kullanici.id)
+      .order("haftanin_gunu")
+      .order("baslangic_saati"),
+  ]);
+  const bugun = bugununTarihi();
 
   const uyeler = (ogrenciler ?? []).filter((o) => o.grup_id === grup.id);
   const adaylar = (ogrenciler ?? [])
@@ -78,54 +92,66 @@ export default async function GrupDetaySayfasi({
         <GrubaOgrenciEkle grupId={grup.id} adaylar={adaylar} />
       </SayfaBasligi>
 
-      <div className="mb-3 flex items-center gap-2 text-sm text-muted-foreground">
-        <RenkNoktasi renk={grup.renk} />
-        {uyeler.length} öğrenci
-      </div>
+      <div className="grid items-start gap-4 lg:grid-cols-3">
+        <div className="lg:col-span-2">
+          <div className="mb-3 flex items-center gap-2 text-sm text-muted-foreground">
+            <RenkNoktasi renk={grup.renk} />
+            {uyeler.length} öğrenci
+          </div>
 
-      {uyeler.length === 0 ? (
-        <Card>
-          <CardContent className="text-sm text-muted-foreground">
-            Bu grupta henüz öğrenci yok.
-          </CardContent>
-        </Card>
-      ) : (
-        <Card className="py-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="pl-4">Ad Soyad</TableHead>
-                <TableHead>Telefon</TableHead>
-                <TableHead className="w-0 pr-4" />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {uyeler.map((ogrenci) => (
-                <TableRow key={ogrenci.id}>
-                  <TableCell className="pl-4 font-medium">
-                    <Link
-                      href={`/ogrenciler/${ogrenci.id}`}
-                      className="hover:underline"
-                    >
-                      {ogrenci.ad_soyad}
-                    </Link>
-                  </TableCell>
-                  <TableCell>
-                    {ogrenci.telefon ? telefonFormatla(ogrenci.telefon) : "—"}
-                  </TableCell>
-                  <TableCell className="pr-4">
-                    <GruptanCikarButonu
-                      grupId={grup.id}
-                      ogrenciId={ogrenci.id}
-                      ogrenciAdi={ogrenci.ad_soyad}
-                    />
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </Card>
-      )}
+          {uyeler.length === 0 ? (
+            <Card>
+              <CardContent className="text-sm text-muted-foreground">
+                Bu grupta henüz öğrenci yok.
+              </CardContent>
+            </Card>
+          ) : (
+            <Card className="py-0">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="pl-4">Ad Soyad</TableHead>
+                    <TableHead>Telefon</TableHead>
+                    <TableHead className="w-0 pr-4" />
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {uyeler.map((ogrenci) => (
+                    <TableRow key={ogrenci.id}>
+                      <TableCell className="pl-4 font-medium">
+                        <Link
+                          href={`/ogrenciler/${ogrenci.id}`}
+                          className="hover:underline"
+                        >
+                          {ogrenci.ad_soyad}
+                        </Link>
+                      </TableCell>
+                      <TableCell>
+                        {ogrenci.telefon
+                          ? telefonFormatla(ogrenci.telefon)
+                          : "—"}
+                      </TableCell>
+                      <TableCell className="pr-4">
+                        <GruptanCikarButonu
+                          grupId={grup.id}
+                          ogrenciId={ogrenci.id}
+                          ogrenciAdi={ogrenci.ad_soyad}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Card>
+          )}
+        </div>
+
+        <HaftalikProgram
+          grupId={grup.id}
+          programlar={programlar ?? []}
+          bugun={bugun}
+        />
+      </div>
     </>
   );
 }
