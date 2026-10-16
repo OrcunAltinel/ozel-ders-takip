@@ -83,6 +83,7 @@ export type Database = {
           id: string
           konu: string | null
           program_id: string | null
+          program_tarihi: string | null
           tarih: string
         }
         Insert: {
@@ -95,6 +96,7 @@ export type Database = {
           id?: string
           konu?: string | null
           program_id?: string | null
+          program_tarihi?: string | null
           tarih: string
         }
         Update: {
@@ -107,6 +109,7 @@ export type Database = {
           id?: string
           konu?: string | null
           program_id?: string | null
+          program_tarihi?: string | null
           tarih?: string
         }
         Relationships: [
@@ -166,6 +169,32 @@ export type Database = {
             foreignKeyName: "gruplar_hoca_id_fkey"
             columns: ["hoca_id"]
             isOneToOne: false
+            referencedRelation: "profiller"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hoca_ayarlari: {
+        Row: {
+          ders_ucreti: number
+          hoca_id: string
+          updated_at: string
+        }
+        Insert: {
+          ders_ucreti: number
+          hoca_id: string
+          updated_at?: string
+        }
+        Update: {
+          ders_ucreti?: number
+          hoca_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hoca_ayarlari_hoca_id_fkey"
+            columns: ["hoca_id"]
+            isOneToOne: true
             referencedRelation: "profiller"
             referencedColumns: ["id"]
           },
@@ -231,7 +260,7 @@ export type Database = {
           ad_soyad: string
           arsivlendi_at: string | null
           created_at: string
-          ders_ucreti: number
+          ders_ucreti: number | null
           grup_id: string | null
           hoca_id: string
           id: string
@@ -244,7 +273,7 @@ export type Database = {
           ad_soyad: string
           arsivlendi_at?: string | null
           created_at?: string
-          ders_ucreti: number
+          ders_ucreti?: number | null
           grup_id?: string | null
           hoca_id: string
           id?: string
@@ -257,7 +286,7 @@ export type Database = {
           ad_soyad?: string
           arsivlendi_at?: string | null
           created_at?: string
-          ders_ucreti?: number
+          ders_ucreti?: number | null
           grup_id?: string | null
           hoca_id?: string
           id?: string
@@ -399,6 +428,14 @@ export type Database = {
         Returns: undefined
       }
       is_yonetici: { Args: never; Returns: boolean }
+      program_derslerini_temizle: {
+        Args: { p_program_id: string; p_tarihten: string }
+        Returns: number
+      }
+      programi_sonlandir: {
+        Args: { p_program_id: string; p_son_tarih: string }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never

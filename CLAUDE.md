@@ -47,8 +47,18 @@ Kullanıcıyla 10 aşamalı bir plan üzerinde çalışılıyor; her aşama sonu
   (giriş yönlendirmesi), `npm run ilk-yonetici` scripti. Uçtan uca test
   edildi (gerçek Supabase projesinde geçici bir hesapla: giriş, pasif/banned
   kullanıcı reddi, middleware yönlendirmesi — sonra temizlendi).
-- [ ] **Aşama 4 — Ana yerleşim + Gruplar ve Öğrenciler** (sıradaki)
-- [ ] **Aşama 5 — Dersler ve Takvim**
+- [x] **Aşama 4 — Ana yerleşim + Gruplar ve Öğrenciler** (kullanıcı onayı
+  bekleniyor): `src/app/(uygulama)/` route grubu + ortak layout (masaüstünde
+  kenar çubuğu, mobilde Sheet menü, kullanıcı menüsü/çıkış). `oturumGetir()`
+  (`src/lib/auth/oturum.ts`, React `cache`) profili yükler; profili olmayan
+  veya pasif kullanıcıyı `/cikis` route handler'ına gönderir. Gruplar:
+  liste (kart), oluştur/düzenle (ad, açıklama, renk), detay sayfasında
+  öğrenci ekle/taşı/çıkar. Öğrenciler: liste (istemci tarafı arama + grup
+  filtresi, bakiye kolonu), oluştur/düzenle, detay (bilgiler + bakiye özeti).
+  Henüz yazılmamış sayfalar (`Yakinda` bileşeni) "Aşama X'te eklenecek"
+  gösterir. `/yonetim` yönetici olmayanlara 404 döner. Arşivleme/silme
+  Aşama 8'e bırakıldı (listeler `arsivlendi_at is null` filtreler).
+- [ ] **Aşama 5 — Dersler ve Takvim** (sıradaki)
 - [ ] **Aşama 6 — Yoklama ve Bugün sayfası**
 - [ ] **Aşama 7 — Ödemeler ve Borçlar**
 - [ ] **Aşama 8 — Arşivleme ve kalıcı silme**
@@ -105,7 +115,16 @@ Kullanıcıyla 10 aşamalı bir plan üzerinde çalışılıyor; her aşama sonu
    ama bu yüzden **tsx/node script'lerinden asla import edilmemeli**
    (`scripts/ilk-yonetici.ts` kendi admin istemcisini oluşturur, çünkü
    `server-only` paketi düz Node ortamında import anında throw eder).
-8. **npm install'lar `--legacy-peer-deps` ile yapılıyor** (zod v3/v4 ve
+8. **Uygulama kalıpları (Aşama 4'te oturdu)**: server action'lar
+   `src/actions/*.ts`, `IslemSonucu` (`{hata}` | `{basarili: true}`) döner,
+   girdiyi zod şemasıyla (`src/lib/validasyon/`) yeniden doğrular ve her
+   sorguda RLS'ye ek olarak açıkça `.eq("hoca_id", kullanici.id)` filtreler
+   (yönetici RLS ile herkesi okuyabildiği için bu filtre şart). Formlar
+   dialog içinde, react-hook-form + `Controller`. Base UI `Select` boş
+   string değer taşıyamaz → "grupsuz"/"tümü" için sentinel değer kullanılır;
+   seçili etiketin görünmesi için `Select`'e `items` prop'u verilir.
+   Tutar girişi `tutarCozumle()` ile ("750", "750,50", "1.250,50").
+9. **npm install'lar `--legacy-peer-deps` ile yapılıyor** (zod v3/v4 ve
    React 19 ekosistemindeki peer dependency sürtüşmeleri nedeniyle).
 
 ## Komutlar
