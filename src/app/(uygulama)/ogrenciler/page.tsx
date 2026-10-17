@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { PlusIcon } from "lucide-react";
-import { oturumGetir } from "@/lib/auth/oturum";
+import { kimlikGetir } from "@/lib/auth/oturum";
 import { dersUcretiGetir } from "@/lib/ayarlar";
 import { paraFormatla } from "@/lib/para";
 import { SayfaBasligi } from "@/components/yerlesim/sayfa-basligi";
@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 
 export default async function OgrencilerSayfasi() {
-  const { supabase, kullanici } = await oturumGetir();
+  const { supabase, kullanici } = await kimlikGetir();
 
   const [
     { data: ogrenciler },

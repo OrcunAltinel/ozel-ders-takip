@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { PlusIcon, UsersIcon } from "lucide-react";
-import { oturumGetir } from "@/lib/auth/oturum";
+import { kimlikGetir } from "@/lib/auth/oturum";
 import { SayfaBasligi } from "@/components/yerlesim/sayfa-basligi";
 import { GrupFormuDialog } from "@/components/gruplar/grup-formu-dialog";
 import { RenkNoktasi } from "@/components/gruplar/renk-noktasi";
@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/card";
 
 export default async function GruplarSayfasi() {
-  const { supabase, kullanici } = await oturumGetir();
+  const { supabase, kullanici } = await kimlikGetir();
 
   const [{ data: gruplar }, { data: ogrenciler }] = await Promise.all([
     supabase

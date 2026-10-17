@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { MessageCircleIcon, WalletIcon } from "lucide-react";
-import { oturumGetir } from "@/lib/auth/oturum";
+import { kimlikGetir } from "@/lib/auth/oturum";
 import { odemeOgrenciSecenekleri } from "@/lib/ogrenci-secenekleri";
 import { paraFormatla } from "@/lib/para";
 import { telefonFormatla } from "@/lib/telefon";
@@ -27,7 +27,7 @@ function whatsappBaglantisi(telefon: string, adSoyad: string, borc: number) {
 }
 
 export default async function BorclarSayfasi() {
-  const { supabase, kullanici } = await oturumGetir();
+  const { supabase, kullanici } = await kimlikGetir();
   const bugun = bugununTarihi();
 
   const [{ data: ogrenciler }, { data: bakiyeler }, secenekler] =

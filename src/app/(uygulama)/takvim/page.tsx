@@ -1,9 +1,9 @@
-import { oturumGetir } from "@/lib/auth/oturum";
+import { kimlikGetir } from "@/lib/auth/oturum";
 import { SayfaBasligi } from "@/components/yerlesim/sayfa-basligi";
 import { TakvimYukleyici } from "@/components/takvim/takvim-yukleyici";
 
 export default async function TakvimSayfasi() {
-  const { supabase, kullanici } = await oturumGetir();
+  const { supabase, kullanici } = await kimlikGetir();
 
   const { data: gruplar } = await supabase
     .from("gruplar")

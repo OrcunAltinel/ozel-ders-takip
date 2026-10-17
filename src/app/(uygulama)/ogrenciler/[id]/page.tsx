@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeftIcon, PencilIcon, WalletIcon } from "lucide-react";
 import { cn } from "cn";
-import { oturumGetir } from "@/lib/auth/oturum";
+import { kimlikGetir } from "@/lib/auth/oturum";
 import { odemeOgrenciSecenekleri } from "@/lib/ogrenci-secenekleri";
 import type { OdemeYontemi } from "@/lib/validasyon/odeme";
 import { bugununTarihi } from "@/lib/zaman/istanbul";
@@ -58,7 +58,7 @@ export default async function OgrenciDetaySayfasi({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const { supabase, kullanici } = await oturumGetir();
+  const { supabase, kullanici } = await kimlikGetir();
 
   const { data: ogrenci } = await supabase
     .from("ogrenciler")

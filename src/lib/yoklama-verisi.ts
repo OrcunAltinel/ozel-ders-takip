@@ -1,5 +1,5 @@
 import "server-only";
-import { oturumGetir } from "@/lib/auth/oturum";
+import { kimlikGetir } from "@/lib/auth/oturum";
 import { saatKisalt } from "@/lib/zaman/saat";
 
 export type YoklamaDurumu = "geldi" | "gelmedi";
@@ -38,7 +38,7 @@ const DERS_ALANLARI =
 export async function yoklamaDersleriniGetir(
   filtre: { tur: "tarih"; tarih: string } | { tur: "id"; dersId: string },
 ): Promise<YoklamaDersi[]> {
-  const { supabase, kullanici } = await oturumGetir();
+  const { supabase, kullanici } = await kimlikGetir();
 
   let sorgu = supabase
     .from("dersler")

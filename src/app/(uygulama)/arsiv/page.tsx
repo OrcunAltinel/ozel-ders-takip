@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { cn } from "cn";
-import { oturumGetir } from "@/lib/auth/oturum";
+import { kimlikGetir } from "@/lib/auth/oturum";
 import { paraFormatla } from "@/lib/para";
 import { kisaTarihFormatla } from "@/lib/zaman/istanbul";
 import { SayfaBasligi } from "@/components/yerlesim/sayfa-basligi";
@@ -35,7 +35,7 @@ function GecmisiVarNotu({ metin }: { metin: string }) {
 }
 
 export default async function ArsivSayfasi() {
-  const { supabase, kullanici } = await oturumGetir();
+  const { supabase, kullanici } = await kimlikGetir();
 
   const [{ data: ogrenciler }, { data: gruplar }, { data: bakiyeler }] =
     await Promise.all([

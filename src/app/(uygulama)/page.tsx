@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { CalendarPlusIcon } from "lucide-react";
-import { oturumGetir } from "@/lib/auth/oturum";
+import { kimlikGetir } from "@/lib/auth/oturum";
 import { dersUcretiGetir } from "@/lib/ayarlar";
 import { yoklamaDersleriniGetir } from "@/lib/yoklama-verisi";
 import {
@@ -19,7 +19,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 const GERIYE_DONUK_GUN = 30;
 
 export default async function BugunSayfasi() {
-  const { supabase, kullanici } = await oturumGetir();
+  const { supabase, kullanici } = await kimlikGetir();
   const bugun = bugununTarihi();
   const baslangic = tariheGunEkle(bugun, -GERIYE_DONUK_GUN);
 

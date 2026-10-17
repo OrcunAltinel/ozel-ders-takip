@@ -104,7 +104,7 @@ Kullanıcıyla 10 aşamalı bir plan üzerinde çalışılıyor; her aşama sonu
   gruplar (ders sayısı); kalıcı silme YALNIZCA arşivdeki ve geçmişi
   (yoklama/ödeme; grup için ders) olmayan kayıtlar için — DB'de de
   `ON DELETE RESTRICT`. Ortak onay bileşeni `components/arsiv/onay-dialog.tsx`.
-- [x] **Aşama 9 — Yönetim paneli** (kullanıcı onayı bekleniyor): `/yonetim`
+- [x] **Aşama 9 — Yönetim paneli**: `/yonetim`
   (yalnızca rol=yonetici; diğerlerine 404, menüde görünmez): hesap listesi
   (rol/durum, aktif öğrenci, alacak, son giriş — `auth.admin.listUsers`),
   "Yeni hesap" (kullanıcı adı/ad/şifre üret/rol), satır menüsü: bilgileri
@@ -117,7 +117,16 @@ Kullanıcıyla 10 aşamalı bir plan üzerinde çalışılıyor; her aşama sonu
   verir (Supabase `user_banned`'ı yanlış şifrede de döndürüyor → ayrı mesaj
   hesabın varlığını sızdırırdı). Türkçe 404: `app/not-found.tsx` ve
   `app/(uygulama)/not-found.tsx`.
-- [ ] **Aşama 10 — Son kontrol** (RLS testi, ücret senaryoları, README) (sıradaki)
+- [x] **Aşama 10 — Son kontrol** (kullanıcı onayı bekleniyor):
+  `npm run kontrol-testi` (`scripts/kontrol-testi.ts`, kalıcı): gerçek
+  projede geçici `kontrol_*` hesaplarla RLS izolasyonu, yönetici salt
+  okuma, rol yükseltme engeli, ücret senaryoları ve silme korumalarını
+  doğrular (39 kontrol), sonunda her şeyi siler. Tam README (kurulum,
+  Auth ayarları, dağıtım). Migration 0009: RLS'de `(select auth.uid())` /
+  `(select is_yonetici())` + fonksiyonlarda sabit `search_path`.
+  **Kullanıcı isteğiyle ek:** (1) Performans: bkz. not 12. (2) Koyu mod:
+  `next-themes` (`components/tema/`), üst çubukta Açık/Koyu/Sistem seçici;
+  `<html suppressHydrationWarning>`.
 
 ## Veritabanı şeması (özet)
 
@@ -205,6 +214,15 @@ Kullanıcıyla 10 aşamalı bir plan üzerinde çalışılıyor; her aşama sonu
    işaret etmeli (Aşama 1'de kendine referans veriyordu → serif'e düşüyordu).
 11. **npm install'lar `--legacy-peer-deps` ile yapılıyor** (zod v3/v4 ve
    React 19 ekosistemindeki peer dependency sürtüşmeleri nedeniyle).
+12. **Performans (Supabase'e her gidiş-dönüş ~150 ms):** Oturum JWT'si
+   `getClaims()` ile YEREL doğrulanır (proje ES256 asimetrik anahtar
+   kullanıyor), middleware ve sayfalarda `getUser()` KULLANMA.
+   `kimlikGetir()` (yalnızca kimlik, ağ isteği yok) salt okuyan sayfalar ve
+   `lib/` yardımcıları içindir; `oturumGetir()` (+profil, pasif kontrolü)
+   layout, yönetici kontrolleri ve veri değiştiren action'lar içindir.
+   `(uygulama)/loading.tsx` geçişlerde anında iskelet gösterir. Ölçüm
+   (production, ortanca): sayfalar ~440 ms → ~125 ms. `npm run dev` modu
+   bunlardan çok daha yavaştır; hız değerlendirmesi production'da yapılmalı.
 
 ## Komutlar
 
@@ -213,6 +231,7 @@ npm run dev              # geliştirme sunucusu (Turbopack)
 npm run build             # production build (webpack)
 npm run lint               # eslint
 npm run ilk-yonetici -- --kullanici <ad> --sifre <sifre> --ad "<Ad Soyad>"
+npm run kontrol-testi     # RLS + ücret + silme kontrol testi (gerçek DB, geçici hesaplar)
 ```
 
 ## Ortam değişkenleri

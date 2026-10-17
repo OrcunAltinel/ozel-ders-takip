@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeftIcon, PencilIcon } from "lucide-react";
-import { oturumGetir } from "@/lib/auth/oturum";
+import { kimlikGetir } from "@/lib/auth/oturum";
 import { telefonFormatla } from "@/lib/telefon";
 import { bugununTarihi } from "@/lib/zaman/istanbul";
 import { HaftalikProgram } from "@/components/gruplar/haftalik-program";
@@ -28,7 +28,7 @@ export default async function GrupDetaySayfasi({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const { supabase, kullanici } = await oturumGetir();
+  const { supabase, kullanici } = await kimlikGetir();
 
   const { data: grup } = await supabase
     .from("gruplar")

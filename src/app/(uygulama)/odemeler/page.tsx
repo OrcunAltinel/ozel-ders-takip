@@ -2,7 +2,7 @@ import Link from "next/link";
 import { addMonths, endOfMonth, format, isValid, parse } from "date-fns";
 import { tr } from "date-fns/locale";
 import { ChevronLeftIcon, ChevronRightIcon, PlusIcon } from "lucide-react";
-import { oturumGetir } from "@/lib/auth/oturum";
+import { kimlikGetir } from "@/lib/auth/oturum";
 import { odemeOgrenciSecenekleri } from "@/lib/ogrenci-secenekleri";
 import { paraFormatla } from "@/lib/para";
 import { ODEME_YONTEMLERI, type OdemeYontemi } from "@/lib/validasyon/odeme";
@@ -30,7 +30,7 @@ export default async function OdemelerSayfasi({
   searchParams: Promise<{ ay?: string }>;
 }) {
   const { ay } = await searchParams;
-  const { supabase, kullanici } = await oturumGetir();
+  const { supabase, kullanici } = await kimlikGetir();
   const bugun = bugununTarihi();
 
   const ayBasi = ayiCozumle(ay, bugun);

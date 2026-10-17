@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "ilk-yonetici": "tsx scripts/ilk-yonetici.ts"
+    "ilk-yonetici": "tsx scripts/ilk-yonetici.ts",
+    "kontrol-testi": "tsx scripts/kontrol-testi.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",

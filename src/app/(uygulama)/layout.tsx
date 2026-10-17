@@ -3,6 +3,7 @@ import { oturumGetir } from "@/lib/auth/oturum";
 import { Menu } from "@/components/yerlesim/menu";
 import { MobilMenu } from "@/components/yerlesim/mobil-menu";
 import { KullaniciMenusu } from "@/components/yerlesim/kullanici-menusu";
+import { TemaDegistirici } from "@/components/tema/tema-degistirici";
 
 export default async function UygulamaYerlesimi({
   children,
@@ -25,10 +26,13 @@ export default async function UygulamaYerlesimi({
             <MobilMenu yoneticiMi={yoneticiMi} />
             <span className="font-semibold md:hidden">Özel Ders Takip</span>
           </div>
-          <KullaniciMenusu
-            adSoyad={profil.ad_soyad}
-            kullaniciAdi={profil.kullanici_adi}
-          />
+          <div className="flex items-center gap-1">
+            <TemaDegistirici />
+            <KullaniciMenusu
+              adSoyad={profil.ad_soyad}
+              kullaniciAdi={profil.kullanici_adi}
+            />
+          </div>
         </header>
         <main className="flex-1 p-4 md:p-6">{children}</main>
       </div>

@@ -31,11 +31,13 @@ export async function oturumuGuncelle(request: NextRequest) {
     },
   );
 
-  // Not: getSession() değil getUser() kullanılır; getUser() token'ı
-  // Supabase sunucusuna karşı doğrular (sahte/eski cookie'lere güvenmez).
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // Not: getSession() değil getClaims() kullanılır. getClaims() JWT'nin
+  // imzasını Supabase'in asimetrik anahtarlarıyla (JWKS önbelleğe alınır)
+  // yerel olarak doğrular; sahte/eski cookie'lere güvenmez ama getUser()
+  // gibi her istekte Auth sunucusuna gitmez. Süresi dolmuş token'ı da
+  // gerektiğinde yeniler (cookie'ler setAll ile yanıta yazılır).
+  const { data } = await supabase.auth.getClaims();
+  const user = data?.claims.sub ?? null;
 
   const girisSayfasindaMi = request.nextUrl.pathname.startsWith("/giris");
 

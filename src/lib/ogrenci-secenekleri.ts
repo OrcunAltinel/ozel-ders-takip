@@ -1,5 +1,5 @@
 import "server-only";
-import { oturumGetir } from "@/lib/auth/oturum";
+import { kimlikGetir } from "@/lib/auth/oturum";
 
 export type OgrenciSecenegi = {
   id: string;
@@ -13,7 +13,7 @@ export type OgrenciSecenegi = {
  * sıfır olmayan arşivdeki öğrenciler (kalan borcunu ödeyebilsinler diye).
  */
 export async function odemeOgrenciSecenekleri(): Promise<OgrenciSecenegi[]> {
-  const { supabase, kullanici } = await oturumGetir();
+  const { supabase, kullanici } = await kimlikGetir();
 
   const [{ data: ogrenciler }, { data: bakiyeler }] = await Promise.all([
     supabase
