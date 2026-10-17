@@ -1,14 +1,14 @@
 import { z } from "zod";
 import { tutarCozumle } from "@/lib/para";
 
-export const dersUcretiSemasi = z.object({
-  dersUcreti: z
+export const saatlikUcretSemasi = z.object({
+  saatlikUcret: z
     .string()
     .trim()
-    .min(1, "Ders ücreti gerekli.")
+    .min(1, "Saatlik ücret gerekli.")
     .refine((deger) => tutarCozumle(deger) !== null, {
-      message: "Geçerli bir tutar girin (örn. 750 veya 750,50).",
+      message: "Geçerli bir tutar girin (örn. 300 veya 300,50).",
     }),
 });
 
-export type DersUcretiGirdisi = z.input<typeof dersUcretiSemasi>;
+export type SaatlikUcretGirdisi = z.input<typeof saatlikUcretSemasi>;

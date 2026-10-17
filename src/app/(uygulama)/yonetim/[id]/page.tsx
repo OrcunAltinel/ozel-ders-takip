@@ -93,7 +93,7 @@ export default async function HocaDetaySayfasi({
       .lte("tarih", bugun),
     supabase
       .from("hoca_ayarlari")
-      .select("ders_ucreti")
+      .select("saatlik_ucret")
       .eq("hoca_id", id)
       .maybeSingle(),
   ]);
@@ -153,8 +153,8 @@ export default async function HocaDetaySayfasi({
         <Ozet etiket="Bu ay tahsilat" deger={paraFormatla(buAyTahsilat)} />
         <Ozet etiket="Toplam alacak" deger={paraFormatla(toplamAlacak)} />
         <Ozet
-          etiket="Ders ücreti"
-          deger={ayar ? paraFormatla(ayar.ders_ucreti) : "Belirlenmedi"}
+          etiket="Saatlik ücret"
+          deger={ayar ? paraFormatla(ayar.saatlik_ucret) : "Belirlenmedi"}
         />
       </div>
 

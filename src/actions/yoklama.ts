@@ -64,11 +64,11 @@ export async function yoklamaKaydet(
 
   const { data: ayar } = await supabase
     .from("hoca_ayarlari")
-    .select("ders_ucreti")
+    .select("saatlik_ucret")
     .eq("hoca_id", kullanici.id)
     .maybeSingle();
   if (!ayar) {
-    return { hata: "Önce Ayarlar sayfasından ders ücretini belirleyin." };
+    return { hata: "Önce Ayarlar sayfasından saatlik ücreti belirleyin." };
   }
 
   if (sonuc.data.length > 0) {

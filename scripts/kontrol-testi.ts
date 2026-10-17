@@ -110,7 +110,7 @@ async function main() {
   const y = await hesapOlustur("y", "yonetici");
 
   // --- A hocasının verileri
-  await a.sb.from("hoca_ayarlari").insert({ hoca_id: a.id, ders_ucreti: 500 });
+  await a.sb.from("hoca_ayarlari").insert({ hoca_id: a.id, saatlik_ucret: 500 });
   const { data: grupA } = await a.sb.from("gruplar").insert({ hoca_id: a.id, ad: "A Grubu" }).select("id").single();
   const { data: ogrA } = await a.sb
     .from("ogrenciler")
@@ -209,10 +209,10 @@ async function main() {
     .insert({ hoca_id: a.id, ders_id: dersA1!.id, ogrenci_id: ogrA!.id, durum: "geldi", ucret: 1 })
     .select("id, ucret")
     .single();
-  kontrol("Yoklama ücreti hoca ayarından kopyalanır (istemcinin 1 ₺'si yok sayılır)", Number(y1?.ucret) === 500, y1);
+  kontrol("Yoklama ücreti = saatlik × süre (1 saatlik ders, 500; istemcinin 1 ₺'si yok sayılır)", Number(y1?.ucret) === 500, y1);
   kontrol("Gelinen 1 ders → borç 500", (await bakiye(a.sb, ogrA!.id)).bakiye === 500);
 
-  await a.sb.from("hoca_ayarlari").update({ ders_ucreti: 650 }).eq("hoca_id", a.id);
+  await a.sb.from("hoca_ayarlari").update({ saatlik_ucret: 650 }).eq("hoca_id", a.id);
   const { data: y1b } = await a.sb.from("yoklamalar").update({ ucret: 9999 }).eq("id", y1!.id).select("ucret").single();
   kontrol("Kayıtlı yoklamanın ücreti sonradan değiştirilemez", Number(y1b?.ucret) === 500, y1b);
 
@@ -224,7 +224,7 @@ async function main() {
   kontrol("Ücret değişikliği yalnızca yeni yoklamalara yansır (650)", Number(y2?.ucret) === 650, y2);
   kontrol("Gelmediği ders borca yazılmaz → borç hâlâ 500", (await bakiye(a.sb, ogrA!.id)).bakiye === 500);
 
-  await a.sb.from("hoca_ayarlari").update({ ders_ucreti: 800 }).eq("hoca_id", a.id);
+  await a.sb.from("hoca_ayarlari").update({ saatlik_ucret: 800 }).eq("hoca_id", a.id);
   await a.sb.from("yoklamalar").update({ durum: "geldi" }).eq("id", y2!.id);
   kontrol("Gelmedi→geldi düzeltmesinde ilk kayıttaki ücret (650) kullanılır → borç 1150", (await bakiye(a.sb, ogrA!.id)).bakiye === 1150);
 
@@ -236,6 +236,19 @@ async function main() {
   const { error: sifirOdeme } = await a.sb.from("odemeler").insert({ hoca_id: a.id, ogrenci_id: ogrA!.id, tutar: 0, tarih: "2026-10-14", odeme_yontemi: "nakit" });
   kontrol("Sıfır/negatif tutarlı ödeme reddedilir", !!sifirOdeme);
 
+  // Saatlik model: 2 saatlik ders, saatlik ücretin (o an 800) iki katı kadar yazılır.
+  const { data: dersA3 } = await a.sb
+    .from("dersler")
+    .insert({ hoca_id: a.id, grup_id: grupA!.id, tarih: "2026-10-19", baslangic_saati: "10:00", bitis_saati: "12:00" })
+    .select("id")
+    .single();
+  const { data: y3 } = await a.sb
+    .from("yoklamalar")
+    .insert({ hoca_id: a.id, ders_id: dersA3!.id, ogrenci_id: ogrA!.id, durum: "geldi", ucret: 0 })
+    .select("ucret")
+    .single();
+  kontrol("2 saatlik ders → ücret saatlik × 2 (800 × 2 = 1600)", Number(y3?.ucret) === 1600, y3);
+
   const { data: grupB2 } = await b.sb.from("gruplar").insert({ hoca_id: b.id, ad: "B2" }).select("id").single();
   const { data: dersB } = await b.sb
     .from("dersler")
@@ -245,7 +258,7 @@ async function main() {
   const { error: ucretsiz } = await b.sb
     .from("yoklamalar")
     .insert({ hoca_id: b.id, ders_id: dersB!.id, ogrenci_id: ogrB!.id, durum: "geldi", ucret: 100 });
-  kontrol("Ders ücreti belirlenmemiş hocanın yoklaması reddedilir", !!ucretsiz && ucretsiz.message.includes("Ders ücreti"), ucretsiz?.message);
+  kontrol("Saatlik ücreti belirlenmemiş hocanın yoklaması reddedilir", !!ucretsiz && ucretsiz.message.includes("Saatlik ücret"), ucretsiz?.message);
 
   // ------------------------------------------------------------ Silme
   bolum("4) Silme korumaları");

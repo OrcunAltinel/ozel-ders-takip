@@ -5,30 +5,32 @@ import { oturumGetir } from "@/lib/auth/oturum";
 import type { IslemSonucu } from "@/lib/islem-sonucu";
 import { tutarCozumle } from "@/lib/para";
 import {
-  dersUcretiSemasi,
-  type DersUcretiGirdisi,
+  saatlikUcretSemasi,
+  type SaatlikUcretGirdisi,
 } from "@/lib/validasyon/ayarlar";
 
 /**
- * Hocanın tüm öğrencileri için geçerli ders başı ücreti kaydeder.
- * Değişiklik yalnızca bundan sonra alınacak yoklamalara yansır; geçmiş
- * yoklamaların ücreti veritabanı tetikleyicisi sayesinde korunur.
+ * Hocanın tüm öğrencileri için geçerli saatlik ücreti kaydeder. Bir yoklamanın
+ * tutarı = saatlik ücret × dersin süresi (saat) olarak hesaplanır. Değişiklik
+ * yalnızca bundan sonra alınacak yoklamalara yansır; geçmiş yoklamaların ücreti
+ * veritabanı tetikleyicisi sayesinde korunur.
  */
-export async function dersUcretiKaydet(
-  girdi: DersUcretiGirdisi,
+export async function saatlikUcretKaydet(
+  girdi: SaatlikUcretGirdisi,
 ): Promise<IslemSonucu> {
-  const sonuc = dersUcretiSemasi.safeParse(girdi);
+  const sonuc = saatlikUcretSemasi.safeParse(girdi);
   if (!sonuc.success) return { hata: "Geçerli bir tutar girin." };
 
   const { supabase, kullanici } = await oturumGetir();
 
   const { error } = await supabase.from("hoca_ayarlari").upsert({
     hoca_id: kullanici.id,
-    ders_ucreti: tutarCozumle(sonuc.data.dersUcreti)!,
+    saatlik_ucret: tutarCozumle(sonuc.data.saatlikUcret)!,
     updated_at: new Date().toISOString(),
   });
 
-  if (error) return { hata: "Ders ücreti kaydedilemedi. Lütfen tekrar deneyin." };
+  if (error)
+    return { hata: "Saatlik ücret kaydedilemedi. Lütfen tekrar deneyin." };
 
   revalidatePath("/", "layout");
   return { basarili: true };

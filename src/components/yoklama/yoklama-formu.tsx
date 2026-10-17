@@ -68,13 +68,14 @@ export function YoklamaFormu({
   dersId,
   satirlar,
   yoklamaAlindi,
-  dersUcreti,
+  buDersinUcreti,
 }: {
   dersId: string;
   satirlar: YoklamaSatiri[];
   yoklamaAlindi: boolean;
-  /** Hocanın güncel ders ücreti (yeni yoklamalarda yazılacak tutar). */
-  dersUcreti: number | null;
+  /** Bu dersin tutarı (saatlik ücret × ders süresi); yeni yoklamalarda gelen
+   *  her öğrenciye yazılacak değer. Ücret belirlenmemişse null. */
+  buDersinUcreti: number | null;
 }) {
   // Yoklama alınmamış öğrenciler varsayılan olarak "geldi" başlar.
   const [durumlar, setDurumlar] = useState<Record<string, YoklamaDurumu>>(() =>
@@ -169,8 +170,8 @@ export function YoklamaFormu({
           {satirlar.length > 0
             ? `${gelenSayisi}/${satirlar.length} öğrenci geldi`
             : null}
-          {!yoklamaAlindi && dersUcreti !== null && gelenSayisi > 0
-            ? ` · gelen her öğrenciye ${paraFormatla(dersUcreti)} yazılır`
+          {!yoklamaAlindi && buDersinUcreti !== null && gelenSayisi > 0
+            ? ` · gelen her öğrenciye ${paraFormatla(buDersinUcreti)} yazılır`
             : null}
         </p>
         <div className="flex gap-2">
@@ -213,7 +214,7 @@ export function YoklamaFormu({
           ) : null}
           <Button size="sm" onClick={kaydet} disabled={beklemede}>
             {beklemede
-              ? "Kaydediliyor..."
+              ? "Kaydediliyor…"
               : yoklamaAlindi
                 ? "Yoklamayı güncelle"
                 : satirlar.length === 0

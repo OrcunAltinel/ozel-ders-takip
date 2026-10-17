@@ -3,6 +3,7 @@ import { ClockIcon } from "lucide-react";
 import { cn } from "cn";
 import type { YoklamaDersi } from "@/lib/yoklama-verisi";
 import { kisaTarihFormatla } from "@/lib/zaman/istanbul";
+import { saatFarkiSaat } from "@/lib/zaman/saat";
 import { RenkNoktasi } from "@/components/gruplar/renk-noktasi";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -17,17 +18,26 @@ import { YoklamaFormu } from "./yoklama-formu";
 
 export function DersYoklamaKarti({
   ders,
-  dersUcreti,
+  saatlikUcret,
   bugun,
   tarihiGoster = false,
 }: {
   ders: YoklamaDersi;
-  dersUcreti: number | null;
+  saatlikUcret: number | null;
   bugun: string;
   tarihiGoster?: boolean;
 }) {
   const iptal = ders.durum === "iptal";
   const gelecek = ders.tarih > bugun;
+  // Bu dersin ücreti = saatlik ücret × ders süresi (saat).
+  const buDersinUcreti =
+    saatlikUcret === null
+      ? null
+      : Math.round(
+          saatlikUcret *
+            saatFarkiSaat(ders.baslangicSaati, ders.bitisSaati) *
+            100,
+        ) / 100;
   // Satırlar değişince (yeni öğrenci, kaydedilen yoklama) form baştan kurulsun.
   const formAnahtari = ders.satirlar
     .map((s) => `${s.ogrenciId}:${s.durum ?? "-"}`)
@@ -78,7 +88,7 @@ export function DersYoklamaKarti({
             dersId={ders.id}
             satirlar={ders.satirlar}
             yoklamaAlindi={ders.yoklamaAlindi}
-            dersUcreti={dersUcreti}
+            buDersinUcreti={buDersinUcreti}
           />
         )}
       </CardContent>

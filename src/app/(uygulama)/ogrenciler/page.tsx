@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { PlusIcon } from "lucide-react";
 import { kimlikGetir } from "@/lib/auth/oturum";
-import { dersUcretiGetir } from "@/lib/ayarlar";
+import { saatlikUcretGetir } from "@/lib/ayarlar";
 import { paraFormatla } from "@/lib/para";
 import { SayfaBasligi } from "@/components/yerlesim/sayfa-basligi";
 import { OgrenciFormuDialog } from "@/components/ogrenciler/ogrenci-formu-dialog";
@@ -18,7 +18,7 @@ export default async function OgrencilerSayfasi() {
     { data: ogrenciler },
     { data: gruplar },
     { data: bakiyeler },
-    dersUcreti,
+    saatlikUcret,
   ] = await Promise.all([
       supabase
         .from("ogrenciler")
@@ -38,7 +38,7 @@ export default async function OgrencilerSayfasi() {
         .from("ogrenci_bakiyeleri")
         .select("ogrenci_id, bakiye")
         .eq("hoca_id", kullanici.id),
-      dersUcretiGetir(),
+      saatlikUcretGetir(),
     ]);
 
   const bakiyeHaritasi = new Map(
@@ -71,22 +71,22 @@ export default async function OgrencilerSayfasi() {
         />
       </SayfaBasligi>
 
-      {dersUcreti === null ? (
+      {saatlikUcret === null ? (
         <p
           role="alert"
           className="mb-4 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200"
         >
-          Ders ücreti henüz belirlenmedi. Yoklama alabilmek için{" "}
+          Saatlik ücret henüz belirlenmedi. Yoklama alabilmek için{" "}
           <Link href="/ayarlar" className="font-medium underline">
             Ayarlar
           </Link>{" "}
-          sayfasından ders ücretini girin.
+          sayfasından saatlik ücreti girin.
         </p>
       ) : (
         <p className="mb-4 text-sm text-muted-foreground">
-          Ders başı ücret:{" "}
+          Saatlik ücret:{" "}
           <span className="font-medium text-foreground">
-            {paraFormatla(dersUcreti)}
+            {paraFormatla(saatlikUcret)}
           </span>{" "}
           (tüm öğrenciler için,{" "}
           <Link href="/ayarlar" className="underline hover:text-foreground">

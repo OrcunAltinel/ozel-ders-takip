@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { CalendarPlusIcon } from "lucide-react";
 import { kimlikGetir } from "@/lib/auth/oturum";
-import { dersUcretiGetir } from "@/lib/ayarlar";
+import { saatlikUcretGetir } from "@/lib/ayarlar";
 import { yoklamaDersleriniGetir } from "@/lib/yoklama-verisi";
 import {
   bugununTarihi,
@@ -29,9 +29,9 @@ export default async function BugunSayfasi() {
     p_bitis: bugun,
   });
 
-  const [dersler, dersUcreti, { data: bekleyenler }] = await Promise.all([
+  const [dersler, saatlikUcret, { data: bekleyenler }] = await Promise.all([
     yoklamaDersleriniGetir({ tur: "tarih", tarih: bugun }),
-    dersUcretiGetir(),
+    saatlikUcretGetir(),
     supabase
       .from("dersler")
       .select("id, tarih, baslangic_saati, bitis_saati, gruplar(ad, renk)")
@@ -56,12 +56,12 @@ export default async function BugunSayfasi() {
         }`}
       />
 
-      {dersUcreti === null ? (
+      {saatlikUcret === null ? (
         <p
           role="alert"
           className="mb-4 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200"
         >
-          Ders ücreti henüz belirlenmedi; yoklama alabilmek için{" "}
+          Saatlik ücret henüz belirlenmedi; yoklama alabilmek için{" "}
           <Link href="/ayarlar" className="font-medium underline">
             Ayarlar
           </Link>{" "}
@@ -89,7 +89,7 @@ export default async function BugunSayfasi() {
               <DersYoklamaKarti
                 key={ders.id}
                 ders={ders}
-                dersUcreti={dersUcreti}
+                saatlikUcret={saatlikUcret}
                 bugun={bugun}
               />
             ))

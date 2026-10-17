@@ -176,17 +176,17 @@ export type Database = {
       }
       hoca_ayarlari: {
         Row: {
-          ders_ucreti: number
+          saatlik_ucret: number
           hoca_id: string
           updated_at: string
         }
         Insert: {
-          ders_ucreti: number
+          saatlik_ucret: number
           hoca_id: string
           updated_at?: string
         }
         Update: {
-          ders_ucreti?: number
+          saatlik_ucret?: number
           hoca_id?: string
           updated_at?: string
         }

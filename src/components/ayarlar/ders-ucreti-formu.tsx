@@ -4,11 +4,11 @@ import { useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { dersUcretiKaydet } from "@/actions/ayarlar";
+import { saatlikUcretKaydet } from "@/actions/ayarlar";
 import { tutariGirdiyeYaz } from "@/lib/para";
 import {
-  dersUcretiSemasi,
-  type DersUcretiGirdisi,
+  saatlikUcretSemasi,
+  type SaatlikUcretGirdisi,
 } from "@/lib/validasyon/ayarlar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,21 +28,21 @@ export function DersUcretiFormu({ mevcutUcret }: { mevcutUcret: number | null })
     handleSubmit,
     reset,
     formState: { errors, isDirty },
-  } = useForm<DersUcretiGirdisi>({
-    resolver: zodResolver(dersUcretiSemasi),
+  } = useForm<SaatlikUcretGirdisi>({
+    resolver: zodResolver(saatlikUcretSemasi),
     defaultValues: {
-      dersUcreti: mevcutUcret === null ? "" : tutariGirdiyeYaz(mevcutUcret),
+      saatlikUcret: mevcutUcret === null ? "" : tutariGirdiyeYaz(mevcutUcret),
     },
   });
 
-  function gonder(girdi: DersUcretiGirdisi) {
+  function gonder(girdi: SaatlikUcretGirdisi) {
     baslatGecisi(async () => {
-      const sonuc = await dersUcretiKaydet(girdi);
+      const sonuc = await saatlikUcretKaydet(girdi);
       if ("hata" in sonuc) {
         toast.error(sonuc.hata);
         return;
       }
-      toast.success("Ders ücreti kaydedildi.");
+      toast.success("Saatlik ücret kaydedildi.");
       reset(girdi);
     });
   }
@@ -50,24 +50,25 @@ export function DersUcretiFormu({ mevcutUcret }: { mevcutUcret: number | null })
   return (
     <form onSubmit={handleSubmit(gonder)} noValidate className="max-w-sm">
       <FieldGroup>
-        <Field data-invalid={!!errors.dersUcreti}>
-          <FieldLabel htmlFor="ders-ucreti">Ders başı ücret (₺)</FieldLabel>
+        <Field data-invalid={!!errors.saatlikUcret}>
+          <FieldLabel htmlFor="saatlik-ucret">Saatlik ücret (₺)</FieldLabel>
           <Input
-            id="ders-ucreti"
+            id="saatlik-ucret"
             inputMode="decimal"
-            placeholder="örn. 750"
-            {...register("dersUcreti")}
+            placeholder="örn. 300"
+            {...register("saatlikUcret")}
           />
           <FieldDescription>
-            Tüm öğrenciler için geçerlidir. Ücreti değiştirirseniz yeni ücret
-            yalnızca bundan sonra alınacak yoklamalara uygulanır; geçmiş
-            dersler eski ücretle kalır.
+            Tüm öğrenciler için geçerlidir. Bir dersin ücreti, saatlik ücret ile
+            ders süresinin çarpımıdır (ör. 2 saatlik ders = 2 × saatlik ücret).
+            Ücreti değiştirirseniz yeni ücret yalnızca bundan sonra alınacak
+            yoklamalara uygulanır; geçmiş dersler eski ücretle kalır.
           </FieldDescription>
-          <FieldError errors={[errors.dersUcreti]} />
+          <FieldError errors={[errors.saatlikUcret]} />
         </Field>
         <div>
           <Button type="submit" disabled={beklemede || !isDirty}>
-            {beklemede ? "Kaydediliyor..." : "Kaydet"}
+            {beklemede ? "Kaydediliyor…" : "Kaydet"}
           </Button>
         </div>
       </FieldGroup>

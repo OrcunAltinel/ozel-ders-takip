@@ -5,6 +5,13 @@ export function saatKisalt(saat: string): string {
   return saat.slice(0, 5);
 }
 
+/** İki "HH:MM" saati arasındaki süreyi saat cinsinden döner (ör. 1.5). */
+export function saatFarkiSaat(baslangic: string, bitis: string): number {
+  const [bs, bd] = baslangic.split(":").map(Number);
+  const [es, ed] = bitis.split(":").map(Number);
+  return (es * 60 + ed - (bs * 60 + bd)) / 60;
+}
+
 /** "16:00" saatine dakika ekler; gün sınırını aşarsa "23:59"da durur. */
 export function saateDakikaEkle(saat: string, dakika: number): string {
   const [s, d] = saat.split(":").map(Number);
