@@ -160,6 +160,15 @@ Plan dışı, kullanıcı istekleriyle yapılan değişiklikler (hepsi `master`'
 - **Ödemelerde isme göre filtre:** `src/components/odemeler/odemeler-listesi.tsx`
   (Türkçe duyarlı, URL `?ad=`); aylık özet ay geneli kalır, liste süzülür.
 
+**Devam noktası (buradan devam edilecek):**
+- **ACİL:** Uygulamada Ayarlar → **Saatlik ücret**'e doğru saat başı ücret
+  girilmeli (migration 0011 eski ders-başı değeri "saatlik" olarak bıraktı,
+  bu yüzden yanlış; girilmeden yoklama ücretleri hatalı hesaplanır).
+- Konuşulan sıradaki iş: **telefondan erişim** — kalıcı erişim için Vercel'e
+  yayına alma (README "Dağıtım"); hızlı test için `npm run dev -- -H 0.0.0.0`
+  + aynı Wi-Fi'de `http://<bilgisayar-LAN-IP>:3000`.
+- Bu oturumun tüm işleri `master`'da ve GitHub'a push edildi (commit 4d1050a).
+
 ## Kalan işler (kullanıcı sonra halledecek)
 
 Plan tamamlandı; aşağıdakiler kullanıcının kendi yapacağı veya ileride
