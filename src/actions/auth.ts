@@ -54,6 +54,9 @@ export async function girisYap(girdi: GirisGirdisi): Promise<GirisSonucu> {
   });
 
   if (error) {
+    // Pasif (yasaklı) hesaplar için de aynı genel mesaj verilir: Supabase
+    // "user_banned" hatasını şifre YANLIŞ olsa bile döndürdüğü için ayrı bir
+    // mesaj, şifreyi bilmeyen birine hesabın varlığını sızdırırdı.
     return { hata: "Kullanıcı adı veya şifre hatalı." };
   }
 

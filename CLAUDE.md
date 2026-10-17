@@ -93,7 +93,7 @@ Kullanıcıyla 10 aşamalı bir plan üzerinde çalışılıyor; her aşama sonu
   listesi `odemeOgrenciSecenekleri()`: aktifler + bakiyesi sıfır olmayan
   arşivdekiler. Öğrenci detay sayfası arşivdeki öğrenciyi de gösterir
   (düzenleme kapalı; `ogrenciGuncelle` de arşivdekini reddeder).
-- [x] **Aşama 8 — Arşivleme ve kalıcı silme** (kullanıcı onayı bekleniyor):
+- [x] **Aşama 8 — Arşivleme ve kalıcı silme**:
   `src/actions/arsiv.ts`. Öğrenci: detay sayfasından "Arşivle"; arşivdeyken
   "Arşivden çıkar" (eski grubu arşivdeyse grupsuz döner) ve geçmişi yoksa
   "Kalıcı sil". Grup: detay sayfasından "Arşivle" → `grubu_arsivle()` (0008,
@@ -104,8 +104,20 @@ Kullanıcıyla 10 aşamalı bir plan üzerinde çalışılıyor; her aşama sonu
   gruplar (ders sayısı); kalıcı silme YALNIZCA arşivdeki ve geçmişi
   (yoklama/ödeme; grup için ders) olmayan kayıtlar için — DB'de de
   `ON DELETE RESTRICT`. Ortak onay bileşeni `components/arsiv/onay-dialog.tsx`.
-- [ ] **Aşama 9 — Yönetim paneli** (sıradaki)
-- [ ] **Aşama 10 — Son kontrol** (RLS testi, ücret senaryoları, README)
+- [x] **Aşama 9 — Yönetim paneli** (kullanıcı onayı bekleniyor): `/yonetim`
+  (yalnızca rol=yonetici; diğerlerine 404, menüde görünmez): hesap listesi
+  (rol/durum, aktif öğrenci, alacak, son giriş — `auth.admin.listUsers`),
+  "Yeni hesap" (kullanıcı adı/ad/şifre üret/rol), satır menüsü: bilgileri
+  düzenle (ad, rol; kendi yönetici rolünü düşüremez), şifre belirle,
+  pasifleştir/aktifleştir (profiller.aktif + Auth `ban_duration`; kendini
+  pasifleştiremez). `/yonetim/[id]`: hocanın verilerinin SALT OKUNUR özeti
+  (RLS'deki yönetici select politikalarıyla). Action'lar `src/actions/yonetim.ts`
+  service role kullanır ve İLK satırda `yoneticiOturumu()` kontrolü yapar
+  (`src/lib/auth/yonetici.ts`). Giriş hatası pasif hesapta da genel mesaj
+  verir (Supabase `user_banned`'ı yanlış şifrede de döndürüyor → ayrı mesaj
+  hesabın varlığını sızdırırdı). Türkçe 404: `app/not-found.tsx` ve
+  `app/(uygulama)/not-found.tsx`.
+- [ ] **Aşama 10 — Son kontrol** (RLS testi, ücret senaryoları, README) (sıradaki)
 
 ## Veritabanı şeması (özet)
 
