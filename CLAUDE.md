@@ -129,7 +129,36 @@ Kullanıcıyla 10 aşamalı bir plan üzerinde çalışılıyor; her aşama sonu
   `<html suppressHydrationWarning>`.
 
 **10 aşamanın tamamı bitti** (son commit'ler GitHub'da:
-`github.com/OrcunAltinel/ozel-ders-takip`, `master`). Son migration: 0010.
+`github.com/OrcunAltinel/ozel-ders-takip`, `master`). Son migration: 0011.
+
+## Oturum sonrası değişiklikler (2026-10-17)
+
+Plan dışı, kullanıcı istekleriyle yapılan değişiklikler (hepsi `master`'da):
+
+- **Güvenlik:** Giriş denemelerine IP başına hız sınırı
+  (`src/lib/auth/giris-limiti.ts`, bellek-içi best-effort; serverless'te
+  örnekler arası paylaşılmaz — ileride Redis/DB'ye taşınabilir). `postcss`
+  transitive açığı `package.json` `overrides` ile 8.5.30'a çekildi (Next
+  sürümü değişmedi; `npm audit` 0 açık). Kod güvenlik incelemesi yapıldı:
+  RLS/trigger/service-role mimarisi sağlam bulundu, sömürülebilir açık yok.
+- **Tasarım/erişilebilirlik** (Web Interface Guidelines denetimi): koyu modda
+  `color-scheme` + `theme-color`; giriş sayfası `<h1>`; dialog/sheet "Kapat";
+  `transition-all` → açık özellik listesi; "İçeriğe atla" skip link;
+  yükleme metinlerinde `…`; öğrenci listesi filtreleri URL'ye yansıyor.
+- **WhatsApp kaldırıldı:** Borçlar sayfasındaki `wa.me` hatırlatma bağlantısı
+  silindi (telefon numarası gösterimi kaldı).
+- **Ücret SAATLİK oldu (migration 0011):** `hoca_ayarlari.ders_ucreti` →
+  `saatlik_ucret`. Yoklama ücreti artık `saatlik_ucret × ders süresi`
+  (bitiş−başlangıç, saat). `yoklama_once_islemler` trigger'ı güncellendi
+  (search_path sabit). Kayıtlı ücretler değişmezliğini korur. **Not:**
+  rename sonrası eski ders-başı değer artık "saatlik" sayıldığından
+  Ayarlar'dan doğru saatlik ücret yeniden girilmeli. Ücret yardımcısı
+  `saatlikUcretGetir()`, şema `saatlikUcretSemasi`.
+- **Kendi şifreni değiştirme:** Ayarlar'da "Şifre" kartı; `src/actions/hesap.ts`
+  `sifreDegistir` mevcut şifreyi geçici istemciyle doğrular, sonra
+  `auth.updateUser` (service role gerekmez).
+- **Ödemelerde isme göre filtre:** `src/components/odemeler/odemeler-listesi.tsx`
+  (Türkçe duyarlı, URL `?ad=`); aylık özet ay geneli kalır, liste süzülür.
 
 ## Kalan işler (kullanıcı sonra halledecek)
 
@@ -138,9 +167,9 @@ istenirse ele alınacak işlerdir. Yeni oturumda kullanıcı bunlardan birini
 isterse buradan devam et.
 
 **Kullanıcının yapması gerekenler (yapılmadan yayına alınmamalı):**
-- [ ] **Supabase'te dışarıdan kaydı kapat:** Authentication → Sign In /
-  Providers → Email → "Allow new users to sign up" KAPALI olmalı. Açıksa
-  herkes Supabase'in genel kayıt ucundan kendi hesabını açabilir.
+- [x] **Supabase'te dışarıdan kaydı kapat:** Authentication → Sign In /
+  Providers → Email → "Allow new users to sign up". **Kullanıcı 2026-10-17'de
+  kapattığını bildirdi.**
 - [ ] **Yayına alma (Vercel):** Adımlar README'de ("Dağıtım"): install
   command `npm install --legacy-peer-deps`, üç ortam değişkeni, fonksiyon
   bölgesini Supabase'e yakın seç (ör. `fra1`), Supabase Auth → URL
