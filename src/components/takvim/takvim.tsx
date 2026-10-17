@@ -59,13 +59,19 @@ function dersiEtkinligeCevir(ders: TakvimDersi): EventInput {
  */
 function etkinlikIcerigi(arg: EventContentArg) {
   if (arg.view.type.startsWith("list")) return true;
-  const ders = arg.event.extendedProps.ders as TakvimDersi;
+  // Saatler kutunun o anki konumundan okunur: boş alanda sürüklerken çizilen
+  // seçim taslağında ders bilgisi yoktur, var olan bir ders sürüklenirken de
+  // yeni saat canlı görünür.
+  const { start, end } = arg.event;
   return (
     <div className="overflow-hidden px-0.5 text-[0.75rem] leading-tight">
-      <div className="font-semibold whitespace-nowrap">
-        {ders.baslangicSaati}–{ders.bitisSaati}
-      </div>
-      <div className="truncate">{arg.event.title}</div>
+      {start ? (
+        <div className="font-semibold whitespace-nowrap">
+          {format(start, "HH:mm")}
+          {end ? `–${format(end, "HH:mm")}` : null}
+        </div>
+      ) : null}
+      <div className="truncate">{arg.event.title || "Yeni ders"}</div>
     </div>
   );
 }

@@ -61,7 +61,7 @@ Kullanıcıyla 10 aşamalı bir plan üzerinde çalışılıyor; her aşama sonu
   bazında tek bir değer (`hoca_ayarlari.ders_ucreti`, `/ayarlar` sayfası);
   tüm öğrenciler için aynı. Öğrenci formunda ücret alanı yok.
 - [x] **Aşama 5 — Dersler ve Takvim**: (kullanıcı isteğiyle: ders kutularında
-  her görünümde "10:00–16:30" biçiminde bitiş saati de gösterilir, `eventContent`)
+  her görünümde "10:00–16:30" biçiminde bitiş saati de gösterilir, `eventContent`; saatler `arg.event.start/end`den okunur — seçim taslağında `extendedProps.ders` YOKTUR)
   `/takvim` (FullCalendar; masaüstünde hafta, mobilde liste görünümü,
   `next/dynamic` ile `ssr:false`). Boş saate tıkla → yeni ders (tek seferlik
   veya "Her hafta tekrarla" → `ders_programlari` satırı). Derse tıkla →
