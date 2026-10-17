@@ -260,7 +260,6 @@ export type Database = {
           ad_soyad: string
           arsivlendi_at: string | null
           created_at: string
-          ders_ucreti: number | null
           grup_id: string | null
           hoca_id: string
           id: string
@@ -273,7 +272,6 @@ export type Database = {
           ad_soyad: string
           arsivlendi_at?: string | null
           created_at?: string
-          ders_ucreti?: number | null
           grup_id?: string | null
           hoca_id: string
           id?: string
@@ -286,7 +284,6 @@ export type Database = {
           ad_soyad?: string
           arsivlendi_at?: string | null
           created_at?: string
-          ders_ucreti?: number | null
           grup_id?: string | null
           hoca_id?: string
           id?: string

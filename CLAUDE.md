@@ -117,7 +117,7 @@ Kullanıcıyla 10 aşamalı bir plan üzerinde çalışılıyor; her aşama sonu
   verir (Supabase `user_banned`'ı yanlış şifrede de döndürüyor → ayrı mesaj
   hesabın varlığını sızdırırdı). Türkçe 404: `app/not-found.tsx` ve
   `app/(uygulama)/not-found.tsx`.
-- [x] **Aşama 10 — Son kontrol** (kullanıcı onayı bekleniyor):
+- [x] **Aşama 10 — Son kontrol**:
   `npm run kontrol-testi` (`scripts/kontrol-testi.ts`, kalıcı): gerçek
   projede geçici `kontrol_*` hesaplarla RLS izolasyonu, yönetici salt
   okuma, rol yükseltme engeli, ücret senaryoları ve silme korumalarını
@@ -127,6 +127,43 @@ Kullanıcıyla 10 aşamalı bir plan üzerinde çalışılıyor; her aşama sonu
   **Kullanıcı isteğiyle ek:** (1) Performans: bkz. not 12. (2) Koyu mod:
   `next-themes` (`components/tema/`), üst çubukta Açık/Koyu/Sistem seçici;
   `<html suppressHydrationWarning>`.
+
+**10 aşamanın tamamı bitti** (son commit'ler GitHub'da:
+`github.com/OrcunAltinel/ozel-ders-takip`, `master`). Son migration: 0010.
+
+## Kalan işler (kullanıcı sonra halledecek)
+
+Plan tamamlandı; aşağıdakiler kullanıcının kendi yapacağı veya ileride
+istenirse ele alınacak işlerdir. Yeni oturumda kullanıcı bunlardan birini
+isterse buradan devam et.
+
+**Kullanıcının yapması gerekenler (yapılmadan yayına alınmamalı):**
+- [ ] **Supabase'te dışarıdan kaydı kapat:** Authentication → Sign In /
+  Providers → Email → "Allow new users to sign up" KAPALI olmalı. Açıksa
+  herkes Supabase'in genel kayıt ucundan kendi hesabını açabilir.
+- [ ] **Yayına alma (Vercel):** Adımlar README'de ("Dağıtım"): install
+  command `npm install --legacy-peer-deps`, üç ortam değişkeni, fonksiyon
+  bölgesini Supabase'e yakın seç (ör. `fra1`), Supabase Auth → URL
+  Configuration → Site URL'ye yayın adresini yaz. Kullanıcı isterse birlikte
+  yapılabilir.
+- [ ] **Gerçek telefonda deneme:** Mobil görünüm (takvim liste görünümü,
+  mobil menü, dialog'lar) gerçek cihazda test edilmedi; yalnızca masaüstü
+  tarayıcıda dar görünümler kontrol edildi.
+- [ ] **Gereksinim dokümanıyla karşılaştırma:** İlk kullanıcı mesajındaki
+  tam gereksinim dokümanı Aşama 4'ten itibaren oturumlarda mevcut değildi;
+  ayrıntılar bu dosyadaki özete ve kullanıcı geri bildirimlerine göre
+  yapıldı. Kullanıcı dokümanda kaçan bir özellik görürse eklenecek.
+
+**İsteğe bağlı fikirler (kullanıcıya önerildi, henüz istenmedi):**
+- Yoklamada tek tıkla "hepsi geldi" / toplu yoklama
+- Aylık rapor veya Excel/CSV dışa aktarma (tahsilat, ders sayıları)
+- Veliye otomatik borç hatırlatması (şu an yalnızca elle WhatsApp bağlantısı)
+- Ders notu / ödev takibi
+
+**Gözlenen ama çözülmemiş küçük durum:** Aşama 6 testinde bir kez
+"Yoklamayı geri al" işlemi veritabanında tamamlandığı halde arayüz birkaç
+saniye beklemede kaldı; tekrar denemede yaşanmadı, sebebi bulunamadı.
+Kullanıcı tekrar bildirirse incelenmeli.
 
 ## Veritabanı şeması (özet)
 
@@ -141,9 +178,8 @@ Kullanıcıyla 10 aşamalı bir plan üzerinde çalışılıyor; her aşama sonu
 - `yoklamalar.ucret`: ilk INSERT'te `hoca_ayarlari.ders_ucreti`'nden
   kopyalanır (ayar yoksa INSERT hata verir), sonraki her UPDATE'te eski
   değer korunur (trigger ile, istemci ne gönderirse göndersin).
-  `ogrenciler.ders_ucreti` sütunu 0006'dan beri KULLANILMIYOR (nullable);
-  silme migration'ı otomatik onaydan geçmediği için bırakıldı — kullanıcı
-  isterse `alter table ogrenciler drop column ders_ucreti` ile kaldırılabilir.
+  Eski öğrenci bazlı `ogrenciler.ders_ucreti` sütunu kullanıcı onayıyla
+  0010'da kaldırıldı (0006'dan beri kullanılmıyordu).
 - `dersleri_uret(p_baslangic, p_bitis)`: tekrarlayan programlardan eksik
   dersleri idempotent üretir. Benzersizlik `unique(program_id, program_tarihi)`
   üzerinden: `program_tarihi` dersin programdaki ASIL tarihidir, ders başka
@@ -243,6 +279,7 @@ npm run kontrol-testi     # RLS + ücret + silme kontrol testi (gerçek DB, geç
 **Supabase Dashboard'da yapılması gereken**: Authentication → Providers →
 Email → **"Allow new users to sign up" kapatılmalı** (kayıt sayfası yok,
 kullanıcılar sadece `ilk-yonetici` scripti veya Yönetim panelinden eklenir).
+Durumu "Kalan işler" bölümünde takip ediliyor.
 
 ## Yerelleştirme kuralları (hatırlatma)
 

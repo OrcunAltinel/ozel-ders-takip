@@ -65,7 +65,7 @@ uyarıları nedeniyle gereklidir.)
 ### 3. Veritabanı
 
 `supabase/migrations/` klasöründeki SQL dosyalarını **numara sırasıyla**
-(0001 → 0009) Supabase panelindeki **SQL Editor**'de çalıştırın. Dosyalar
+(0001 → 0010) Supabase panelindeki **SQL Editor**'de çalıştırın. Dosyalar
 tabloları, `ogrenci_bakiyeleri` görünümünü, RLS politikalarını,
 tetikleyicileri ve ders üretim fonksiyonlarını oluşturur.
 
