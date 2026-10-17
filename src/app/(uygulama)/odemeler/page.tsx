@@ -9,10 +9,8 @@ import { ODEME_YONTEMLERI, type OdemeYontemi } from "@/lib/validasyon/odeme";
 import { bugununTarihi } from "@/lib/zaman/istanbul";
 import { SayfaBasligi } from "@/components/yerlesim/sayfa-basligi";
 import { OdemeFormuDialog } from "@/components/odemeler/odeme-formu-dialog";
-import {
-  OdemeTablosu,
-  type OdemeSatiri,
-} from "@/components/odemeler/odeme-tablosu";
+import { type OdemeSatiri } from "@/components/odemeler/odeme-tablosu";
+import { OdemelerListesi } from "@/components/odemeler/odemeler-listesi";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -144,13 +142,11 @@ export default async function OdemelerSayfasi({
           </CardContent>
         </Card>
       ) : (
-        <Card className="py-0">
-          <OdemeTablosu
-            odemeler={odemeler}
-            ogrenciler={ogrenciler}
-            bugun={bugun}
-          />
-        </Card>
+        <OdemelerListesi
+          odemeler={odemeler}
+          ogrenciler={ogrenciler}
+          bugun={bugun}
+        />
       )}
     </>
   );
