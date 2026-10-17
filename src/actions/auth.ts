@@ -1,8 +1,13 @@
 "use server";
 
 import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
+import {
+  basarisizDenemeKaydet,
+  denemeleriSifirla,
+  girisDenemesiKontrol,
+} from "@/lib/auth/giris-limiti";
 import { kullaniciAdindanEmailUret } from "@/lib/auth/kullanici-adi";
 import type { Database } from "@/types/database.types";
 import { girisSemasi, type GirisGirdisi } from "@/lib/validasyon/auth";
@@ -21,6 +26,22 @@ export async function girisYap(girdi: GirisGirdisi): Promise<GirisSonucu> {
   const sonuc = girisSemasi.safeParse(girdi);
   if (!sonuc.success) {
     return { hata: "Kullanıcı adı veya şifre hatalı." };
+  }
+
+  // Kaba kuvvet denemelerini yavaşlatmak için istemci IP'si başına sınır.
+  const istekBasliklari = await headers();
+  const ip =
+    istekBasliklari.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    istekBasliklari.get("x-real-ip") ||
+    "bilinmeyen";
+  const limitAnahtari = `giris:${ip}`;
+
+  const limit = girisDenemesiKontrol(limitAnahtari);
+  if (!limit.izinli) {
+    const dakika = Math.ceil(limit.kalanSaniye / 60);
+    return {
+      hata: `Çok fazla başarısız giriş denemesi. Lütfen ${dakika} dakika sonra tekrar deneyin.`,
+    };
   }
 
   const { kullaniciAdi, sifre, beniHatirla } = sonuc.data;
@@ -54,12 +75,14 @@ export async function girisYap(girdi: GirisGirdisi): Promise<GirisSonucu> {
   });
 
   if (error) {
+    basarisizDenemeKaydet(limitAnahtari);
     // Pasif (yasaklı) hesaplar için de aynı genel mesaj verilir: Supabase
     // "user_banned" hatasını şifre YANLIŞ olsa bile döndürdüğü için ayrı bir
     // mesaj, şifreyi bilmeyen birine hesabın varlığını sızdırırdı.
     return { hata: "Kullanıcı adı veya şifre hatalı." };
   }
 
+  denemeleriSifirla(limitAnahtari);
   redirect("/");
 }
 
