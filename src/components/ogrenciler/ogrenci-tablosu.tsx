@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { SearchIcon } from "lucide-react";
 import { cn } from "cn";
 import { paraFormatla } from "@/lib/para";
@@ -49,8 +50,26 @@ export function OgrenciTablosu({
   ogrenciler: OgrenciSatiri[];
   gruplar: { id: string; ad: string }[];
 }) {
-  const [arama, setArama] = useState("");
-  const [grupFiltresi, setGrupFiltresi] = useState<string>(TUMU);
+  const searchParams = useSearchParams();
+  const [arama, setArama] = useState(() => searchParams.get("ara") ?? "");
+  const [grupFiltresi, setGrupFiltresi] = useState<string>(
+    () => searchParams.get("grup") ?? TUMU,
+  );
+
+  // Arama ve grup filtresini URL'ye yansıtır (paylaşılabilir/derin bağlantı).
+  // Filtreleme tamamen istemci tarafında olduğundan, sunucu bileşenini
+  // yeniden çalıştırmamak için History API kullanılır (router.replace değil).
+  const urlGuncelle = useCallback((yeniArama: string, yeniGrup: string) => {
+    const params = new URLSearchParams();
+    if (yeniArama.trim()) params.set("ara", yeniArama.trim());
+    if (yeniGrup !== TUMU) params.set("grup", yeniGrup);
+    const sorgu = params.toString();
+    window.history.replaceState(
+      null,
+      "",
+      sorgu ? `?${sorgu}` : window.location.pathname,
+    );
+  }, []);
 
   const filtreOgeleri = [
     { value: TUMU, label: "Tüm gruplar" },
@@ -90,7 +109,10 @@ export function OgrenciTablosu({
           <SearchIcon className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={arama}
-            onChange={(e) => setArama(e.target.value)}
+            onChange={(e) => {
+              setArama(e.target.value);
+              urlGuncelle(e.target.value, grupFiltresi);
+            }}
             placeholder="Ad veya telefon ara"
             className="pl-8"
             aria-label="Öğrenci ara"
@@ -99,7 +121,11 @@ export function OgrenciTablosu({
         <Select
           items={filtreOgeleri}
           value={grupFiltresi}
-          onValueChange={(deger) => setGrupFiltresi(deger ?? TUMU)}
+          onValueChange={(deger) => {
+            const yeni = deger ?? TUMU;
+            setGrupFiltresi(yeni);
+            urlGuncelle(arama, yeni);
+          }}
         >
           <SelectTrigger className="min-w-40" aria-label="Gruba göre filtrele">
             <SelectValue />

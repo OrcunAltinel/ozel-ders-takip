@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -18,6 +18,15 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Özel Ders Takip",
   description: "Özel ders yoklama, takvim ve borç takip sistemi",
+};
+
+// Tarayıcı arayüz rengi sayfa arka planıyla eşleşir (globals.css'teki
+// --background: açık temada beyaz, koyu temada oklch(0.145 0 0) ≈ #0a0a0a).
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
+  ],
 };
 
 export default function RootLayout({

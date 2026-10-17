@@ -170,7 +170,7 @@ export function KullaniciOlusturDialog() {
               Vazgeç
             </Button>
             <Button type="submit" disabled={beklemede}>
-              {beklemede ? "Oluşturuluyor..." : "Oluştur"}
+              {beklemede ? "Oluşturuluyor…" : "Oluştur"}
             </Button>
           </DialogFooter>
         </form>

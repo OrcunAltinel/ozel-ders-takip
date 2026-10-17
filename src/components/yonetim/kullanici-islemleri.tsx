@@ -215,7 +215,7 @@ function ProfilDuzenleDialog({
               Vazgeç
             </Button>
             <Button type="submit" disabled={beklemede}>
-              {beklemede ? "Kaydediliyor..." : "Kaydet"}
+              {beklemede ? "Kaydediliyor…" : "Kaydet"}
             </Button>
           </DialogFooter>
         </form>
@@ -277,7 +277,7 @@ function SifreDialog({
               Vazgeç
             </Button>
             <Button type="submit" disabled={beklemede}>
-              {beklemede ? "Kaydediliyor..." : "Şifreyi kaydet"}
+              {beklemede ? "Kaydediliyor…" : "Şifreyi kaydet"}
             </Button>
           </DialogFooter>
         </form>

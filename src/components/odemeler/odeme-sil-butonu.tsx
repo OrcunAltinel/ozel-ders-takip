@@ -61,7 +61,7 @@ export function OdemeSilButonu({
             Vazgeç
           </Button>
           <Button variant="destructive" onClick={sil} disabled={beklemede}>
-            {beklemede ? "Siliniyor..." : "Sil"}
+            {beklemede ? "Siliniyor…" : "Sil"}
           </Button>
         </DialogFooter>
       </DialogContent>

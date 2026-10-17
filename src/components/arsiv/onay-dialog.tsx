@@ -74,7 +74,7 @@ export function OnayDialog({
             onClick={onayla}
             disabled={beklemede}
           >
-            {beklemede ? "Lütfen bekleyin..." : onayEtiketi}
+            {beklemede ? "Lütfen bekleyin…" : onayEtiketi}
           </Button>
         </DialogFooter>
       </DialogContent>

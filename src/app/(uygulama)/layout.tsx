@@ -13,6 +13,12 @@ export default async function UygulamaYerlesimi({
 
   return (
     <div className="flex flex-1">
+      <a
+        href="#ana-icerik"
+        className="sr-only focus-visible:not-sr-only focus-visible:fixed focus-visible:top-2 focus-visible:left-2 focus-visible:z-50 focus-visible:rounded-md focus-visible:bg-background focus-visible:px-3 focus-visible:py-2 focus-visible:text-sm focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        İçeriğe atla
+      </a>
       <aside className="hidden w-60 shrink-0 flex-col gap-6 border-r bg-sidebar px-3 py-5 md:flex">
         <Link href="/" className="px-3 text-base font-semibold">
           Özel Ders Takip
@@ -34,7 +40,9 @@ export default async function UygulamaYerlesimi({
             />
           </div>
         </header>
-        <main className="flex-1 p-4 md:p-6">{children}</main>
+        <main id="ana-icerik" tabIndex={-1} className="flex-1 p-4 md:p-6 outline-none">
+          {children}
+        </main>
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MessageCircleIcon, WalletIcon } from "lucide-react";
+import { WalletIcon } from "lucide-react";
 import { kimlikGetir } from "@/lib/auth/oturum";
 import { odemeOgrenciSecenekleri } from "@/lib/ogrenci-secenekleri";
 import { paraFormatla } from "@/lib/para";
@@ -19,12 +19,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
-/** Veliye (yoksa öğrenciye) borç hatırlatması için WhatsApp bağlantısı. */
-function whatsappBaglantisi(telefon: string, adSoyad: string, borc: number) {
-  const mesaj = `Merhaba, ${adSoyad} için ödenmemiş ders ücreti tutarı ${paraFormatla(borc)}'dir. Bilgilerinize sunarım.`;
-  return `https://wa.me/90${telefon}?text=${encodeURIComponent(mesaj)}`;
-}
 
 export default async function BorclarSayfasi() {
   const { supabase, kullanici } = await kimlikGetir();
@@ -149,24 +143,6 @@ export default async function BorclarSayfasi() {
                     </TableCell>
                     <TableCell className="pr-4">
                       <div className="flex justify-end gap-1">
-                        {iletisim ? (
-                          <a
-                            href={whatsappBaglantisi(
-                              iletisim,
-                              s.ad_soyad,
-                              s.bakiye,
-                            )}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            title="WhatsApp ile hatırlat"
-                            className="inline-flex size-7 items-center justify-center rounded-md text-emerald-600 hover:bg-muted"
-                          >
-                            <MessageCircleIcon className="size-4" />
-                            <span className="sr-only">
-                              WhatsApp ile hatırlat
-                            </span>
-                          </a>
-                        ) : null}
                         <OdemeFormuDialog
                           ogrenciler={secenekler}
                           bugun={bugun}

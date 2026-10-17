@@ -101,7 +101,7 @@ export function ProgramSonlandirDialog({
             onClick={sonlandir}
             disabled={beklemede || !sonTarih}
           >
-            {beklemede ? "Sonlandırılıyor..." : "Sonlandır"}
+            {beklemede ? "Sonlandırılıyor…" : "Sonlandır"}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -110,7 +110,7 @@ export function GrubaOgrenciEkle({
             Vazgeç
           </Button>
           <Button onClick={ekle} disabled={!secilen || beklemede}>
-            {beklemede ? "Ekleniyor..." : "Ekle"}
+            {beklemede ? "Ekleniyor…" : "Ekle"}
           </Button>
         </DialogFooter>
       </DialogContent>

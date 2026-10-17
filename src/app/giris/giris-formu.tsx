@@ -49,6 +49,8 @@ export function GirisFormu() {
           <Input
             id="kullaniciAdi"
             autoComplete="username"
+            autoCapitalize="none"
+            spellCheck={false}
             autoFocus
             {...register("kullaniciAdi")}
           />
@@ -88,7 +90,7 @@ export function GirisFormu() {
         ) : null}
 
         <Button type="submit" disabled={beklemede} className="w-full">
-          {beklemede ? "Giriş yapılıyor..." : "Giriş Yap"}
+          {beklemede ? "Giriş yapılıyor…" : "Giriş Yap"}
         </Button>
       </FieldGroup>
     </form>

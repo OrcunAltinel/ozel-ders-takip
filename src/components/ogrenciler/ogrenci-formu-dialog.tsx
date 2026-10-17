@@ -216,7 +216,7 @@ export function OgrenciFormuDialog({
               Vazgeç
             </Button>
             <Button type="submit" disabled={beklemede}>
-              {beklemede ? "Kaydediliyor..." : "Kaydet"}
+              {beklemede ? "Kaydediliyor…" : "Kaydet"}
             </Button>
           </DialogFooter>
         </form>
