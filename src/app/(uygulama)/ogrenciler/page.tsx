@@ -76,7 +76,8 @@ export default async function OgrencilerSayfasi() {
           role="alert"
           className="mb-4 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200"
         >
-          Saatlik ücret henüz belirlenmedi. Yoklama alabilmek için{" "}
+          Varsayılan saatlik ücret henüz belirlenmedi. Grup veya öğrenci ücreti
+          olmayan derslerde yoklama alabilmek için{" "}
           <Link href="/ayarlar" className="font-medium underline">
             Ayarlar
           </Link>{" "}
@@ -84,11 +85,11 @@ export default async function OgrencilerSayfasi() {
         </p>
       ) : (
         <p className="mb-4 text-sm text-muted-foreground">
-          Saatlik ücret:{" "}
+          Varsayılan saatlik ücret:{" "}
           <span className="font-medium text-foreground">
             {paraFormatla(saatlikUcret)}
           </span>{" "}
-          (tüm öğrenciler için,{" "}
+          (grup veya öğrenciye özel ücret yoksa,{" "}
           <Link href="/ayarlar" className="underline hover:text-foreground">
             değiştir
           </Link>

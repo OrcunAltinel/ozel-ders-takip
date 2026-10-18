@@ -25,8 +25,10 @@ saat dilimine göre hesaplanır.
 
 ## Ücret kuralları
 
-- Ders ücreti hoca başına **tek bir değerdir** ve tüm öğrenciler için
-  geçerlidir (**Ayarlar** sayfası). Ücret girilmeden yoklama alınamaz.
+- Ücret **saatliktir**; bir dersin ücreti = saatlik ücret × ders süresi.
+  Saatlik ücret öncelik sırasıyla: öğrenciye özel ücret (grup sayfasındaki
+  üye tablosu) → grubun ücreti (grup formu) → varsayılan ücret (**Ayarlar**).
+  Hiçbiri yoksa yoklama alınamaz.
 - Yoklamada **"Geldi"** işaretlenen her öğrencinin borcuna o dersin ücreti
   yazılır; "Gelmedi" borç oluşturmaz.
 - Ücret, yoklama **ilk kaydedildiğinde** kopyalanır ve bir daha değişmez.
@@ -65,7 +67,7 @@ uyarıları nedeniyle gereklidir.)
 ### 3. Veritabanı
 
 `supabase/migrations/` klasöründeki SQL dosyalarını **numara sırasıyla**
-(0001 → 0010) Supabase panelindeki **SQL Editor**'de çalıştırın. Dosyalar
+(0001 → 0012) Supabase panelindeki **SQL Editor**'de çalıştırın. Dosyalar
 tabloları, `ogrenci_bakiyeleri` görünümünü, RLS politikalarını,
 tetikleyicileri ve ders üretim fonksiyonlarını oluşturur.
 
@@ -123,7 +125,8 @@ npm run dev      # geliştirme sunucusu: http://localhost:3000
 
 1. Yönetici olarak giriş yapın ve **Yönetim** sayfasından hocalar için hesap
    açın (yönetici de uygulamayı hoca olarak kullanabilir).
-2. **Ayarlar**'dan ders başı ücreti girin.
+2. **Ayarlar**'dan varsayılan saatlik ücreti girin (gruplara/öğrencilere
+   farklı ücret Gruplar sayfasından verilebilir).
 3. **Gruplar**'dan grupları, **Öğrenciler**'den öğrencileri ekleyin.
 4. Grup sayfasındaki **Haftalık program** ile tekrarlayan dersleri tanımlayın
    veya **Takvim**'den tek seferlik ders ekleyin.

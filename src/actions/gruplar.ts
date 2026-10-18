@@ -4,6 +4,11 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { oturumGetir } from "@/lib/auth/oturum";
 import type { IslemSonucu } from "@/lib/islem-sonucu";
+import { tutarCozumle } from "@/lib/para";
+import {
+  ogrenciUcretiSemasi,
+  type OgrenciUcretiGirdisi,
+} from "@/lib/validasyon/ayarlar";
 import { grupSemasi, type GrupGirdisi } from "@/lib/validasyon/grup";
 
 const idSemasi = z.uuid();
@@ -19,13 +24,14 @@ export async function grupOlustur(girdi: GrupGirdisi): Promise<IslemSonucu> {
   if (!sonuc.success) return { hata: "Form bilgileri geçersiz." };
 
   const { supabase, kullanici } = await oturumGetir();
-  const { ad, aciklama, renk } = sonuc.data;
+  const { ad, aciklama, renk, saatlikUcret } = sonuc.data;
 
   const { error } = await supabase.from("gruplar").insert({
     hoca_id: kullanici.id,
     ad,
     aciklama: aciklama || null,
     renk,
+    saatlik_ucret: tutarCozumle(saatlikUcret),
   });
 
   if (error) return { hata: "Grup oluşturulamadı. Lütfen tekrar deneyin." };
@@ -44,11 +50,16 @@ export async function grupGuncelle(
   }
 
   const { supabase, kullanici } = await oturumGetir();
-  const { ad, aciklama, renk } = sonuc.data;
+  const { ad, aciklama, renk, saatlikUcret } = sonuc.data;
 
   const { data, error } = await supabase
     .from("gruplar")
-    .update({ ad, aciklama: aciklama || null, renk })
+    .update({
+      ad,
+      aciklama: aciklama || null,
+      renk,
+      saatlik_ucret: tutarCozumle(saatlikUcret),
+    })
     .eq("id", grupId)
     .eq("hoca_id", kullanici.id)
     .select("id");
@@ -58,6 +69,44 @@ export async function grupGuncelle(
   }
 
   sayfalariYenile(grupId);
+  return { basarili: true };
+}
+
+/**
+ * Öğrenciye kişiye özel saatlik ücret atar; boş girdi özel ücreti kaldırır
+ * (öğrenci yeniden grubun / varsayılan ücrete döner). Yalnızca sonraki
+ * yoklamaları etkiler.
+ */
+export async function ogrenciUcretiAyarla(
+  grupId: string,
+  ogrenciId: string,
+  girdi: OgrenciUcretiGirdisi,
+): Promise<IslemSonucu> {
+  const sonuc = ogrenciUcretiSemasi.safeParse(girdi);
+  if (
+    !sonuc.success ||
+    !idSemasi.safeParse(grupId).success ||
+    !idSemasi.safeParse(ogrenciId).success
+  ) {
+    return { hata: "Geçerli bir tutar girin ya da boş bırakın." };
+  }
+
+  const { supabase, kullanici } = await oturumGetir();
+
+  const { data, error } = await supabase
+    .from("ogrenciler")
+    .update({ saatlik_ucret: tutarCozumle(sonuc.data.saatlikUcret) })
+    .eq("id", ogrenciId)
+    .eq("hoca_id", kullanici.id)
+    .is("arsivlendi_at", null)
+    .select("id");
+
+  if (error || !data?.length) {
+    return { hata: "Ücret kaydedilemedi. Lütfen tekrar deneyin." };
+  }
+
+  sayfalariYenile(grupId);
+  revalidatePath(`/ogrenciler/${ogrenciId}`);
   return { basarili: true };
 }
 

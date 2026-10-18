@@ -68,14 +68,10 @@ export function YoklamaFormu({
   dersId,
   satirlar,
   yoklamaAlindi,
-  buDersinUcreti,
 }: {
   dersId: string;
   satirlar: YoklamaSatiri[];
   yoklamaAlindi: boolean;
-  /** Bu dersin tutarı (saatlik ücret × ders süresi); yeni yoklamalarda gelen
-   *  her öğrenciye yazılacak değer. Ücret belirlenmemişse null. */
-  buDersinUcreti: number | null;
 }) {
   // Yoklama alınmamış öğrenciler varsayılan olarak "geldi" başlar.
   const [durumlar, setDurumlar] = useState<Record<string, YoklamaDurumu>>(() =>
@@ -87,6 +83,14 @@ export function YoklamaFormu({
   const gelenSayisi = Object.values(durumlar).filter(
     (d) => d === "geldi",
   ).length;
+  // Yeni yoklamada gelenlerin borcuna yazılacak toplam (ücreti belli olanlar).
+  const yazilacakToplam = satirlar.reduce(
+    (toplam, s) =>
+      durumlar[s.ogrenciId] === "geldi" && s.tahminiUcret !== null
+        ? toplam + s.tahminiUcret
+        : toplam,
+    0,
+  );
 
   function kaydet() {
     baslatGecisi(async () => {
@@ -137,7 +141,9 @@ export function YoklamaFormu({
                 <div className="truncate text-sm font-medium">
                   {satir.adSoyad}
                 </div>
-                {satir.gruptanAyrildi || satir.durum === "geldi" ? (
+                {satir.gruptanAyrildi ||
+                satir.durum === "geldi" ||
+                !yoklamaAlindi ? (
                   <div className="text-xs text-muted-foreground">
                     {satir.gruptanAyrildi ? "Artık bu grupta değil" : null}
                     {satir.gruptanAyrildi && satir.durum === "geldi"
@@ -146,6 +152,11 @@ export function YoklamaFormu({
                     {/* Ücret yalnızca kaydedilmiş "geldi" yoklamasında borca yazılır. */}
                     {satir.durum === "geldi" && satir.ucret !== null
                       ? `Ücret: ${paraFormatla(satir.ucret)}`
+                      : null}
+                    {!yoklamaAlindi
+                      ? satir.tahminiUcret === null
+                        ? "Saatlik ücret belirlenmemiş"
+                        : `Ders ücreti: ${paraFormatla(satir.tahminiUcret)}`
                       : null}
                   </div>
                 ) : null}
@@ -170,8 +181,8 @@ export function YoklamaFormu({
           {satirlar.length > 0
             ? `${gelenSayisi}/${satirlar.length} öğrenci geldi`
             : null}
-          {!yoklamaAlindi && buDersinUcreti !== null && gelenSayisi > 0
-            ? ` · gelen her öğrenciye ${paraFormatla(buDersinUcreti)} yazılır`
+          {!yoklamaAlindi && yazilacakToplam > 0
+            ? ` · toplam ${paraFormatla(yazilacakToplam)} borca yazılır`
             : null}
         </p>
         <div className="flex gap-2">

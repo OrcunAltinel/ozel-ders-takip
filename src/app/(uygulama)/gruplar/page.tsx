@@ -1,6 +1,8 @@
 import Link from "next/link";
-import { PlusIcon, UsersIcon } from "lucide-react";
+import { BanknoteIcon, PlusIcon, UsersIcon } from "lucide-react";
 import { kimlikGetir } from "@/lib/auth/oturum";
+import { saatlikUcretGetir } from "@/lib/ayarlar";
+import { paraFormatla } from "@/lib/para";
 import { SayfaBasligi } from "@/components/yerlesim/sayfa-basligi";
 import { GrupFormuDialog } from "@/components/gruplar/grup-formu-dialog";
 import { RenkNoktasi } from "@/components/gruplar/renk-noktasi";
@@ -16,20 +18,22 @@ import {
 export default async function GruplarSayfasi() {
   const { supabase, kullanici } = await kimlikGetir();
 
-  const [{ data: gruplar }, { data: ogrenciler }] = await Promise.all([
-    supabase
-      .from("gruplar")
-      .select("id, ad, aciklama, renk")
-      .eq("hoca_id", kullanici.id)
-      .is("arsivlendi_at", null)
-      .order("ad"),
-    supabase
-      .from("ogrenciler")
-      .select("grup_id")
-      .eq("hoca_id", kullanici.id)
-      .is("arsivlendi_at", null)
-      .not("grup_id", "is", null),
-  ]);
+  const [{ data: gruplar }, { data: ogrenciler }, varsayilanUcret] =
+    await Promise.all([
+      supabase
+        .from("gruplar")
+        .select("id, ad, aciklama, renk, saatlik_ucret")
+        .eq("hoca_id", kullanici.id)
+        .is("arsivlendi_at", null)
+        .order("ad"),
+      supabase
+        .from("ogrenciler")
+        .select("grup_id")
+        .eq("hoca_id", kullanici.id)
+        .is("arsivlendi_at", null)
+        .not("grup_id", "is", null),
+      saatlikUcretGetir(),
+    ]);
 
   const ogrenciSayilari = new Map<string, number>();
   for (const { grup_id } of ogrenciler ?? []) {
@@ -45,6 +49,7 @@ export default async function GruplarSayfasi() {
         aciklama="Dersler gruplar üzerinden planlanır. Tek öğrencili özel dersler için de bir grup oluşturun."
       >
         <GrupFormuDialog
+          varsayilanUcret={varsayilanUcret}
           tetikleyici={
             <Button>
               <PlusIcon />
@@ -80,9 +85,17 @@ export default async function GruplarSayfasi() {
                     </CardDescription>
                   ) : null}
                 </CardHeader>
-                <CardContent className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                  <UsersIcon className="size-4" />
-                  {ogrenciSayilari.get(grup.id) ?? 0} öğrenci
+                <CardContent className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
+                  <span className="inline-flex items-center gap-1.5">
+                    <UsersIcon className="size-4" />
+                    {ogrenciSayilari.get(grup.id) ?? 0} öğrenci
+                  </span>
+                  {grup.saatlik_ucret !== null ? (
+                    <span className="inline-flex items-center gap-1.5 tabular-nums">
+                      <BanknoteIcon className="size-4" />
+                      {paraFormatla(grup.saatlik_ucret)}/saat
+                    </span>
+                  ) : null}
                 </CardContent>
               </Card>
             </Link>

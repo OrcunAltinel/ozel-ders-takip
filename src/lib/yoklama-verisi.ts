@@ -1,6 +1,7 @@
 import "server-only";
 import { kimlikGetir } from "@/lib/auth/oturum";
-import { saatKisalt } from "@/lib/zaman/saat";
+import { saatlikUcretGetir } from "@/lib/ayarlar";
+import { saatFarkiSaat, saatKisalt } from "@/lib/zaman/saat";
 
 export type YoklamaDurumu = "geldi" | "gelmedi";
 
@@ -11,6 +12,9 @@ export type YoklamaSatiri = {
   durum: YoklamaDurumu | null;
   /** Yoklama alınmışsa o anki ücret (sonradan değişmez). */
   ucret: number | null;
+  /** Yoklama yeni alınırsa yazılacak ücret (öğrenci > grup > varsayılan
+   *  saatlik ücret × ders süresi); hiçbir ücret belirlenmemişse null. */
+  tahminiUcret: number | null;
   /** Öğrenci artık bu grupta değil ama bu derste yoklaması var. */
   gruptanAyrildi: boolean;
 };
@@ -28,7 +32,7 @@ export type YoklamaDersi = {
 };
 
 const DERS_ALANLARI =
-  "id, tarih, baslangic_saati, bitis_saati, durum, konu, grup_id, gruplar(id, ad, renk)";
+  "id, tarih, baslangic_saati, bitis_saati, durum, konu, grup_id, gruplar(id, ad, renk, saatlik_ucret)";
 
 /**
  * Verilen filtreyle seçilen derslerin yoklama ekranı verisini hazırlar:
@@ -55,22 +59,32 @@ export async function yoklamaDersleriniGetir(
   const grupIdleri = [...new Set(dersler.map((d) => d.grup_id))];
   const dersIdleri = dersler.map((d) => d.id);
 
-  const [{ data: uyeler }, { data: yoklamalar }] = await Promise.all([
-    supabase
-      .from("ogrenciler")
-      .select("id, ad_soyad, grup_id")
-      .eq("hoca_id", kullanici.id)
-      .in("grup_id", grupIdleri)
-      .is("arsivlendi_at", null)
-      .order("ad_soyad"),
-    supabase
-      .from("yoklamalar")
-      .select("ders_id, ogrenci_id, durum, ucret, ogrenciler(ad_soyad)")
-      .eq("hoca_id", kullanici.id)
-      .in("ders_id", dersIdleri),
-  ]);
+  const [{ data: uyeler }, { data: yoklamalar }, varsayilanUcret] =
+    await Promise.all([
+      supabase
+        .from("ogrenciler")
+        .select("id, ad_soyad, grup_id, saatlik_ucret")
+        .eq("hoca_id", kullanici.id)
+        .in("grup_id", grupIdleri)
+        .is("arsivlendi_at", null)
+        .order("ad_soyad"),
+      supabase
+        .from("yoklamalar")
+        .select(
+          "ders_id, ogrenci_id, durum, ucret, ogrenciler(ad_soyad, saatlik_ucret)",
+        )
+        .eq("hoca_id", kullanici.id)
+        .in("ders_id", dersIdleri),
+      saatlikUcretGetir(),
+    ]);
 
   return dersler.map((ders) => {
+    const sure = saatFarkiSaat(ders.baslangic_saati, ders.bitis_saati);
+    const grupUcreti = ders.gruplar?.saatlik_ucret ?? varsayilanUcret;
+    const tahminiUcret = (ozelUcret: number | null | undefined) => {
+      const saatlik = ozelUcret ?? grupUcreti;
+      return saatlik === null ? null : Math.round(saatlik * sure * 100) / 100;
+    };
     const dersYoklamalari = (yoklamalar ?? []).filter(
       (y) => y.ders_id === ders.id,
     );
@@ -90,6 +104,7 @@ export async function yoklamaDersleriniGetir(
           adSoyad: o.ad_soyad,
           durum: (y?.durum as YoklamaDurumu | undefined) ?? null,
           ucret: y?.ucret ?? null,
+          tahminiUcret: tahminiUcret(o.saatlik_ucret),
           gruptanAyrildi: false,
         };
       }),
@@ -100,6 +115,7 @@ export async function yoklamaDersleriniGetir(
           adSoyad: y.ogrenciler?.ad_soyad ?? "",
           durum: y.durum as YoklamaDurumu,
           ucret: y.ucret,
+          tahminiUcret: tahminiUcret(y.ogrenciler?.saatlik_ucret),
           gruptanAyrildi: true,
         })),
     ];
@@ -111,7 +127,9 @@ export async function yoklamaDersleriniGetir(
       bitisSaati: saatKisalt(ders.bitis_saati),
       durum: ders.durum as YoklamaDersi["durum"],
       konu: ders.konu,
-      grup: ders.gruplar ?? { id: ders.grup_id, ad: "", renk: "#4b5563" },
+      grup: ders.gruplar
+        ? { id: ders.gruplar.id, ad: ders.gruplar.ad, renk: ders.gruplar.renk }
+        : { id: ders.grup_id, ad: "", renk: "#4b5563" },
       yoklamaAlindi: ders.durum === "yapildi" || dersYoklamalari.length > 0,
       satirlar,
     };

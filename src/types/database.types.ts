@@ -145,6 +145,7 @@ export type Database = {
           hoca_id: string
           id: string
           renk: string
+          saatlik_ucret: number | null
         }
         Insert: {
           aciklama?: string | null
@@ -154,6 +155,7 @@ export type Database = {
           hoca_id: string
           id?: string
           renk?: string
+          saatlik_ucret?: number | null
         }
         Update: {
           aciklama?: string | null
@@ -163,6 +165,7 @@ export type Database = {
           hoca_id?: string
           id?: string
           renk?: string
+          saatlik_ucret?: number | null
         }
         Relationships: [
           {
@@ -264,6 +267,7 @@ export type Database = {
           hoca_id: string
           id: string
           notlar: string | null
+          saatlik_ucret: number | null
           telefon: string | null
           veli_ad: string | null
           veli_telefon: string | null
@@ -276,6 +280,7 @@ export type Database = {
           hoca_id: string
           id?: string
           notlar?: string | null
+          saatlik_ucret?: number | null
           telefon?: string | null
           veli_ad?: string | null
           veli_telefon?: string | null
@@ -288,6 +293,7 @@ export type Database = {
           hoca_id?: string
           id?: string
           notlar?: string | null
+          saatlik_ucret?: number | null
           telefon?: string | null
           veli_ad?: string | null
           veli_telefon?: string | null

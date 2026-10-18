@@ -7,6 +7,7 @@ import { CheckIcon } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "cn";
 import { grupGuncelle, grupOlustur } from "@/actions/gruplar";
+import { paraFormatla, tutariGirdiyeYaz } from "@/lib/para";
 import {
   GRUP_RENKLERI,
   grupSemasi,
@@ -25,6 +26,7 @@ import {
 } from "@/components/ui/dialog";
 import {
   Field,
+  FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
@@ -35,14 +37,18 @@ type DuzenlenecekGrup = {
   ad: string;
   aciklama: string | null;
   renk: string;
+  saatlik_ucret: number | null;
 };
 
 export function GrupFormuDialog({
   grup,
+  varsayilanUcret,
   tetikleyici,
 }: {
   /** Verilirse düzenleme, verilmezse yeni grup formu açılır. */
   grup?: DuzenlenecekGrup;
+  /** Hocanın varsayılan saatlik ücreti (Ayarlar); belirlenmemişse null. */
+  varsayilanUcret: number | null;
   tetikleyici: React.ReactElement;
 }) {
   const [acik, setAcik] = useState(false);
@@ -52,6 +58,8 @@ export function GrupFormuDialog({
     ad: grup?.ad ?? "",
     aciklama: grup?.aciklama ?? "",
     renk: grup?.renk ?? GRUP_RENKLERI[0],
+    saatlikUcret:
+      grup?.saatlik_ucret == null ? "" : tutariGirdiyeYaz(grup.saatlik_ucret),
   };
 
   const {
@@ -108,6 +116,25 @@ export function GrupFormuDialog({
                 {...register("aciklama")}
               />
               <FieldError errors={[errors.aciklama]} />
+            </Field>
+
+            <Field data-invalid={!!errors.saatlikUcret}>
+              <FieldLabel htmlFor="grup-ucret">Saatlik ücret (₺)</FieldLabel>
+              <Input
+                id="grup-ucret"
+                inputMode="decimal"
+                placeholder={
+                  varsayilanUcret === null
+                    ? "İsteğe bağlı"
+                    : `Varsayılan: ${paraFormatla(varsayilanUcret)}`
+                }
+                {...register("saatlikUcret")}
+              />
+              <FieldDescription>
+                Boş bırakılırsa Ayarlar&apos;daki varsayılan saatlik ücret
+                kullanılır. Değişiklik yalnızca sonraki yoklamalara yansır.
+              </FieldDescription>
+              <FieldError errors={[errors.saatlikUcret]} />
             </Field>
 
             <Controller

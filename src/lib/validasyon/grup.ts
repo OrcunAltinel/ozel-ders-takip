@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { istegeBagliUcretSemasi } from "./ayarlar";
 
 export const GRUP_RENKLERI = [
   "#2563eb", // mavi
@@ -24,6 +25,7 @@ export const grupSemasi = z.object({
   renk: z
     .string()
     .regex(/^#[0-9a-fA-F]{6}$/, "Geçerli bir renk seçin."),
+  saatlikUcret: istegeBagliUcretSemasi,
 });
 
 export type GrupGirdisi = z.input<typeof grupSemasi>;

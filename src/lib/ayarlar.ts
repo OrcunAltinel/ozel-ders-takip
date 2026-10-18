@@ -1,8 +1,12 @@
 import "server-only";
+import { cache } from "react";
 import { kimlikGetir } from "@/lib/auth/oturum";
 
-/** Oturumdaki hocanın saatlik ücretini döner; henüz belirlenmemişse null. */
-export async function saatlikUcretGetir(): Promise<number | null> {
+/**
+ * Oturumdaki hocanın varsayılan saatlik ücretini döner; henüz belirlenmemişse
+ * null. Grup veya öğrenciye özel ücret yoksa bu ücret uygulanır.
+ */
+export const saatlikUcretGetir = cache(async (): Promise<number | null> => {
   const { supabase, kullanici } = await kimlikGetir();
 
   const { data } = await supabase
@@ -12,4 +16,4 @@ export async function saatlikUcretGetir(): Promise<number | null> {
     .maybeSingle();
 
   return data?.saatlik_ucret ?? null;
-}
+});

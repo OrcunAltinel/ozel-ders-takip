@@ -27,7 +27,7 @@ function sayfalariYenile(dersId: string) {
 /**
  * Dersin yoklamasını kaydeder (ilk kez veya güncelleme) ve dersi "yapıldı"
  * olarak işaretler. Ücret veritabanı tetikleyicisi tarafından ilk kayıtta
- * hoca ayarından kopyalanır; güncellemede (ör. gelmedi → geldi) eski ücret
+ * öğrenci > grup > varsayılan saatlik ücretten hesaplanır; güncellemede (ör. gelmedi → geldi) eski ücret
  * korunur.
  */
 export async function yoklamaKaydet(
@@ -62,15 +62,6 @@ export async function yoklamaKaydet(
     return { hata: "Henüz yapılmamış bir dersin yoklaması alınamaz." };
   }
 
-  const { data: ayar } = await supabase
-    .from("hoca_ayarlari")
-    .select("saatlik_ucret")
-    .eq("hoca_id", kullanici.id)
-    .maybeSingle();
-  if (!ayar) {
-    return { hata: "Önce Ayarlar sayfasından saatlik ücreti belirleyin." };
-  }
-
   if (sonuc.data.length > 0) {
     const { error } = await supabase.from("yoklamalar").upsert(
       sonuc.data.map((k) => ({
@@ -83,7 +74,15 @@ export async function yoklamaKaydet(
       })),
       { onConflict: "ders_id,ogrenci_id" },
     );
-    if (error) return { hata: "Yoklama kaydedilemedi. Lütfen tekrar deneyin." };
+    if (error) {
+      // Tetikleyici: öğrencinin, grubun ve hocanın hiçbir saatlik ücreti yok.
+      if (error.message.includes("Saatlik ücret belirlenmemiş")) {
+        return {
+          hata: "Bazı öğrenciler için saatlik ücret belirlenmemiş. Ayarlar'dan varsayılan ücreti ya da grup/öğrenci ücretini girin.",
+        };
+      }
+      return { hata: "Yoklama kaydedilemedi. Lütfen tekrar deneyin." };
+    }
   }
 
   const { error: dersHatasi } = await supabase

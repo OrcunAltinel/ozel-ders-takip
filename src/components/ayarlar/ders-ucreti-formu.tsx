@@ -51,7 +51,7 @@ export function DersUcretiFormu({ mevcutUcret }: { mevcutUcret: number | null })
     <form onSubmit={handleSubmit(gonder)} noValidate className="max-w-sm">
       <FieldGroup>
         <Field data-invalid={!!errors.saatlikUcret}>
-          <FieldLabel htmlFor="saatlik-ucret">Saatlik ücret (₺)</FieldLabel>
+          <FieldLabel htmlFor="saatlik-ucret">Varsayılan saatlik ücret (₺)</FieldLabel>
           <Input
             id="saatlik-ucret"
             inputMode="decimal"
@@ -59,8 +59,10 @@ export function DersUcretiFormu({ mevcutUcret }: { mevcutUcret: number | null })
             {...register("saatlikUcret")}
           />
           <FieldDescription>
-            Tüm öğrenciler için geçerlidir. Bir dersin ücreti, saatlik ücret ile
-            ders süresinin çarpımıdır (ör. 2 saatlik ders = 2 × saatlik ücret).
+            Grup veya öğrenciye özel ücret belirlenmemişse bu ücret uygulanır
+            (özel ücretler Gruplar sayfasından girilir). Bir dersin ücreti,
+            saatlik ücret ile ders süresinin çarpımıdır (ör. 2 saatlik ders =
+            2 × saatlik ücret).
             Ücreti değiştirirseniz yeni ücret yalnızca bundan sonra alınacak
             yoklamalara uygulanır; geçmiş dersler eski ücretle kalır.
           </FieldDescription>

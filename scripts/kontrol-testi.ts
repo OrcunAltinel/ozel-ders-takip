@@ -260,6 +260,28 @@ async function main() {
     .insert({ hoca_id: b.id, ders_id: dersB!.id, ogrenci_id: ogrB!.id, durum: "geldi", ucret: 100 });
   kontrol("Saatlik ücreti belirlenmemiş hocanın yoklaması reddedilir", !!ucretsiz && ucretsiz.message.includes("Saatlik ücret"), ucretsiz?.message);
 
+  // Ücret önceliği: öğrenciye özel > dersin grubu > hocanın varsayılanı.
+  await b.sb.from("gruplar").update({ saatlik_ucret: 300 }).eq("id", grupB2!.id);
+  const { data: yGrup } = await b.sb
+    .from("yoklamalar")
+    .insert({ hoca_id: b.id, ders_id: dersB!.id, ogrenci_id: ogrB!.id, durum: "geldi", ucret: 0 })
+    .select("ucret")
+    .single();
+  kontrol("Varsayılan ücret yokken grup ücreti uygulanır (300 × 1 saat)", Number(yGrup?.ucret) === 300, yGrup);
+
+  await b.sb.from("ogrenciler").update({ saatlik_ucret: 450 }).eq("id", ogrB!.id);
+  const { data: dersB3 } = await b.sb
+    .from("dersler")
+    .insert({ hoca_id: b.id, grup_id: grupB2!.id, tarih: "2026-10-12", baslangic_saati: "10:00", bitis_saati: "11:30" })
+    .select("id")
+    .single();
+  const { data: yOzel } = await b.sb
+    .from("yoklamalar")
+    .insert({ hoca_id: b.id, ders_id: dersB3!.id, ogrenci_id: ogrB!.id, durum: "geldi", ucret: 0 })
+    .select("ucret")
+    .single();
+  kontrol("Öğrenciye özel ücret grup ücretinden önce gelir (450 × 1,5 saat = 675)", Number(yOzel?.ucret) === 675, yOzel);
+
   // ------------------------------------------------------------ Silme
   bolum("4) Silme korumaları");
   const { error: yoklamaliDers } = await a.sb.from("dersler").delete().eq("id", dersA1!.id);

@@ -221,7 +221,7 @@ export function Takvim({
           buttonText={{ listWeek: "Liste" }}
           height="auto"
           allDaySlot={false}
-          slotMinTime="07:00:00"
+          slotMinTime="07:30:00"
           slotMaxTime="23:00:00"
           scrollTime="14:00:00"
           slotLabelFormat={SAAT_BICIMI}

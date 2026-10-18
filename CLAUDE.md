@@ -129,7 +129,7 @@ Kullanıcıyla 10 aşamalı bir plan üzerinde çalışılıyor; her aşama sonu
   `<html suppressHydrationWarning>`.
 
 **10 aşamanın tamamı bitti** (son commit'ler GitHub'da:
-`github.com/OrcunAltinel/ozel-ders-takip`, `master`). Son migration: 0011.
+`github.com/OrcunAltinel/ozel-ders-takip`, `master`). Son migration: 0012.
 
 ## Oturum sonrası değişiklikler (2026-10-17)
 
@@ -160,6 +160,21 @@ Plan dışı, kullanıcı istekleriyle yapılan değişiklikler (hepsi `master`'
 - **Ödemelerde isme göre filtre:** `src/components/odemeler/odemeler-listesi.tsx`
   (Türkçe duyarlı, URL `?ad=`); aylık özet ay geneli kalır, liste süzülür.
 
+## Oturum değişiklikleri (2026-10-18)
+
+- **Grup ve öğrenci bazlı saatlik ücret (migration 0012):** `gruplar.saatlik_ucret`
+  ve `ogrenciler.saatlik_ucret` (ikisi de null olabilir). Yoklama ücreti
+  önceliği: öğrenciye özel > dersin grubunun ücreti > `hoca_ayarlari`
+  (artık "varsayılan" ücret). Hepsi boşsa trigger reddeder; `yoklamaKaydet`
+  bu hatayı Türkçe mesaja çevirir (önceden varsayılan ücreti ön kontrol
+  ediyordu, kaldırıldı). Grup ücreti grup formunda; öğrenciye özel ücret
+  grup detayındaki üye tablosunun "Saatlik ücret" hücresinden
+  (`components/gruplar/ogrenci-ucreti-dialog.tsx`, action `ogrenciUcretiAyarla`).
+  Yoklama formu her satırda o öğrencinin ders ücretini gösterir
+  (`YoklamaSatiri.tahminiUcret`). `saatlikUcretGetir()` artık React `cache`.
+  Kontrol testi 42 kontrol.
+- Takvim `slotMinTime` 07:00 → **07:30**.
+
 **Devam noktası (buradan devam edilecek):**
 - **ACİL:** Uygulamada Ayarlar → **Saatlik ücret**'e doğru saat başı ücret
   girilmeli (migration 0011 eski ders-başı değeri "saatlik" olarak bıraktı,
@@ -167,7 +182,8 @@ Plan dışı, kullanıcı istekleriyle yapılan değişiklikler (hepsi `master`'
 - Konuşulan sıradaki iş: **telefondan erişim** — kalıcı erişim için Vercel'e
   yayına alma (README "Dağıtım"); hızlı test için `npm run dev -- -H 0.0.0.0`
   + aynı Wi-Fi'de `http://<bilgisayar-LAN-IP>:3000`.
-- Bu oturumun tüm işleri `master`'da ve GitHub'a push edildi (commit 4d1050a).
+- 2026-10-17 ve 2026-10-18 oturumlarının tüm işleri `master`'da ve GitHub'a
+  push edildi.
 
 ## Kalan işler (kullanıcı sonra halledecek)
 

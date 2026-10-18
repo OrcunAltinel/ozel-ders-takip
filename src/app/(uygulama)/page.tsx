@@ -61,7 +61,8 @@ export default async function BugunSayfasi() {
           role="alert"
           className="mb-4 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200"
         >
-          Saatlik ücret henüz belirlenmedi; yoklama alabilmek için{" "}
+          Varsayılan saatlik ücret henüz belirlenmedi; grup veya öğrenci ücreti
+          olmayan derslerde yoklama alabilmek için{" "}
           <Link href="/ayarlar" className="font-medium underline">
             Ayarlar
           </Link>{" "}
@@ -89,7 +90,6 @@ export default async function BugunSayfasi() {
               <DersYoklamaKarti
                 key={ders.id}
                 ders={ders}
-                saatlikUcret={saatlikUcret}
                 bugun={bugun}
               />
             ))

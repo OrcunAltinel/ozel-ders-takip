@@ -2,7 +2,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeftIcon } from "lucide-react";
 import { z } from "zod";
-import { saatlikUcretGetir } from "@/lib/ayarlar";
 import { yoklamaDersleriniGetir } from "@/lib/yoklama-verisi";
 import { bugununTarihi, tarihFormatla } from "@/lib/zaman/istanbul";
 import { SayfaBasligi } from "@/components/yerlesim/sayfa-basligi";
@@ -16,10 +15,7 @@ export default async function DersSayfasi({
   const { id } = await params;
   if (!z.uuid().safeParse(id).success) notFound();
 
-  const [[ders], saatlikUcret] = await Promise.all([
-    yoklamaDersleriniGetir({ tur: "id", dersId: id }),
-    saatlikUcretGetir(),
-  ]);
+  const [ders] = await yoklamaDersleriniGetir({ tur: "id", dersId: id });
   if (!ders) notFound();
 
   return (
@@ -35,7 +31,6 @@ export default async function DersSayfasi({
       <div className="max-w-2xl">
         <DersYoklamaKarti
           ders={ders}
-          saatlikUcret={saatlikUcret}
           bugun={bugununTarihi()}
           tarihiGoster
         />

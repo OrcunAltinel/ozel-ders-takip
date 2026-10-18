@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeftIcon, PencilIcon } from "lucide-react";
 import { kimlikGetir } from "@/lib/auth/oturum";
+import { saatlikUcretGetir } from "@/lib/ayarlar";
+import { paraFormatla } from "@/lib/para";
 import { telefonFormatla } from "@/lib/telefon";
 import { bugununTarihi } from "@/lib/zaman/istanbul";
 import { HaftalikProgram } from "@/components/gruplar/haftalik-program";
@@ -11,6 +13,7 @@ import { GrupFormuDialog } from "@/components/gruplar/grup-formu-dialog";
 import { RenkNoktasi } from "@/components/gruplar/renk-noktasi";
 import { GrubaOgrenciEkle } from "@/components/gruplar/gruba-ogrenci-ekle";
 import { GruptanCikarButonu } from "@/components/gruplar/gruptan-cikar-butonu";
+import { OgrenciUcretiDialog } from "@/components/gruplar/ogrenci-ucreti-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -32,7 +35,7 @@ export default async function GrupDetaySayfasi({
 
   const { data: grup } = await supabase
     .from("gruplar")
-    .select("id, ad, aciklama, renk")
+    .select("id, ad, aciklama, renk, saatlik_ucret")
     .eq("id", id)
     .eq("hoca_id", kullanici.id)
     .is("arsivlendi_at", null)
@@ -42,24 +45,29 @@ export default async function GrupDetaySayfasi({
 
   // Hocanın tüm aktif öğrencileri: hem bu grubun üyeleri hem de
   // "Öğrenci ekle" listesindeki adaylar için kullanılır.
-  const [{ data: ogrenciler }, { data: programlar }] = await Promise.all([
-    supabase
-      .from("ogrenciler")
-      .select("id, ad_soyad, telefon, grup_id, gruplar(ad)")
-      .eq("hoca_id", kullanici.id)
-      .is("arsivlendi_at", null)
-      .order("ad_soyad"),
-    supabase
-      .from("ders_programlari")
-      .select(
-        "id, haftanin_gunu, baslangic_saati, bitis_saati, baslangic_tarihi, bitis_tarihi",
-      )
-      .eq("grup_id", grup.id)
-      .eq("hoca_id", kullanici.id)
-      .order("haftanin_gunu")
-      .order("baslangic_saati"),
-  ]);
+  const [{ data: ogrenciler }, { data: programlar }, varsayilanUcret] =
+    await Promise.all([
+      supabase
+        .from("ogrenciler")
+        .select("id, ad_soyad, telefon, grup_id, saatlik_ucret, gruplar(ad)")
+        .eq("hoca_id", kullanici.id)
+        .is("arsivlendi_at", null)
+        .order("ad_soyad"),
+      supabase
+        .from("ders_programlari")
+        .select(
+          "id, haftanin_gunu, baslangic_saati, bitis_saati, baslangic_tarihi, bitis_tarihi",
+        )
+        .eq("grup_id", grup.id)
+        .eq("hoca_id", kullanici.id)
+        .order("haftanin_gunu")
+        .order("baslangic_saati"),
+      saatlikUcretGetir(),
+    ]);
   const bugun = bugununTarihi();
+
+  // Özel ücreti olmayan üyelere uygulanan ücret.
+  const grupUcreti = grup.saatlik_ucret ?? varsayilanUcret;
 
   const uyeler = (ogrenciler ?? []).filter((o) => o.grup_id === grup.id);
   const adaylar = (ogrenciler ?? [])
@@ -83,6 +91,7 @@ export default async function GrupDetaySayfasi({
       <SayfaBasligi baslik={grup.ad} aciklama={grup.aciklama ?? undefined}>
         <GrupFormuDialog
           grup={grup}
+          varsayilanUcret={varsayilanUcret}
           tetikleyici={
             <Button variant="outline">
               <PencilIcon />
@@ -108,6 +117,14 @@ export default async function GrupDetaySayfasi({
           <div className="mb-3 flex items-center gap-2 text-sm text-muted-foreground">
             <RenkNoktasi renk={grup.renk} />
             {uyeler.length} öğrenci
+            <span aria-hidden>·</span>
+            Saatlik ücret:{" "}
+            <span className="font-medium text-foreground">
+              {grupUcreti === null ? "belirlenmedi" : paraFormatla(grupUcreti)}
+            </span>
+            {grup.saatlik_ucret === null && grupUcreti !== null
+              ? "(varsayılan)"
+              : null}
           </div>
 
           {uyeler.length === 0 ? (
@@ -123,6 +140,7 @@ export default async function GrupDetaySayfasi({
                   <TableRow>
                     <TableHead className="pl-4">Ad Soyad</TableHead>
                     <TableHead>Telefon</TableHead>
+                    <TableHead>Saatlik ücret</TableHead>
                     <TableHead className="w-0 pr-4" />
                   </TableRow>
                 </TableHeader>
@@ -141,6 +159,15 @@ export default async function GrupDetaySayfasi({
                         {ogrenci.telefon
                           ? telefonFormatla(ogrenci.telefon)
                           : "—"}
+                      </TableCell>
+                      <TableCell>
+                        <OgrenciUcretiDialog
+                          grupId={grup.id}
+                          ogrenciId={ogrenci.id}
+                          ogrenciAdi={ogrenci.ad_soyad}
+                          ozelUcret={ogrenci.saatlik_ucret}
+                          grupUcreti={grupUcreti}
+                        />
                       </TableCell>
                       <TableCell className="pr-4">
                         <GruptanCikarButonu
