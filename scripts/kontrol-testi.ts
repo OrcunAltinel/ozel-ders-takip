@@ -13,6 +13,7 @@
  * kullanılamaz; script kendi istemcilerini oluşturur.
  */
 import { config as loadEnv } from "dotenv";
+import { randomBytes } from "node:crypto";
 import path from "node:path";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "../src/types/database.types";
@@ -31,7 +32,9 @@ type Istemci = SupabaseClient<Database>;
 const SECENEKLER = { auth: { persistSession: false, autoRefreshToken: false } };
 const admin: Istemci = createClient<Database>(URL_, SERVIS, SECENEKLER);
 const ONEK = `kontrol_${Date.now()}`;
-const SIFRE = "KontrolTesti!12345";
+// Her çalıştırmada rastgele: test yarıda kesilip hesaplar kalırsa,
+// repodaki sabit bir şifreyle bu hesaplara girilemesin.
+const SIFRE = `Kt!${randomBytes(18).toString("base64url")}`;
 const olusturulanlar: string[] = [];
 
 let basarili = 0;

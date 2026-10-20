@@ -29,10 +29,14 @@ export async function girisYap(girdi: GirisGirdisi): Promise<GirisSonucu> {
   }
 
   // Kaba kuvvet denemelerini yavaşlatmak için istemci IP'si başına sınır.
+  // x-forwarded-for'un İLK değeri istemcinin kendisinin yazabildiği kısımdır
+  // (her denemede sahte IP ile sınır atlatılabilirdi); bu yüzden önce
+  // barındırıcının (Vercel) koyduğu x-real-ip, yoksa listeye en son ekleyen
+  // vekilin yazdığı SON değer kullanılır.
   const istekBasliklari = await headers();
   const ip =
-    istekBasliklari.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    istekBasliklari.get("x-real-ip") ||
+    istekBasliklari.get("x-real-ip")?.trim() ||
+    istekBasliklari.get("x-forwarded-for")?.split(",").at(-1)?.trim() ||
     "bilinmeyen";
   const limitAnahtari = `giris:${ip}`;
 
